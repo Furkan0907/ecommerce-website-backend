@@ -7,8 +7,6 @@ import com.furkan.dto.request.RegisterRequest;
 import com.furkan.dto.response.AuthResponse;
 import com.furkan.dto.response.DtoUser;
 
-import java.util.Date;
-
 public interface IAuthenticationService {
 
     DtoUser register(RegisterRequest input);

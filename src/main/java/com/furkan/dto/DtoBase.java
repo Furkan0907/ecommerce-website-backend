@@ -3,7 +3,7 @@ package com.furkan.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -11,7 +11,7 @@ public class DtoBase {
 
     private Long id;
 
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 }

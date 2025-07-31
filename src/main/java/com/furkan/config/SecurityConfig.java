@@ -5,6 +5,7 @@ import com.furkan.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,14 +35,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers(REGISTER, AUTHENTICATE, REFRESH_TOKEN, LOGOUT).permitAll()
-                                .anyRequest().authenticated())
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(REGISTER, AUTHENTICATE, REFRESH_TOKEN, LOGOUT).permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
+
+                        .requestMatchers(HttpMethod.PUT, "api/users/**").authenticated()
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+
+                        .anyRequest().authenticated()
+                )
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint(authEntryPoint))
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authenticationProvider(authenticationProvider)
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
