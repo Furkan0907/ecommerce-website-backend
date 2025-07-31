@@ -16,18 +16,18 @@ public class RootEntity<T> {
 
     private String errorMessage;
 
+    private String message;
+
     public static <T> RootEntity<T> ok(T payload) {
         RootEntity<T> rootEntity = new RootEntity<>();
         rootEntity.setStatus(HttpStatus.OK.value());
         rootEntity.setPayload(payload);
-        rootEntity.setErrorMessage(null);
         return rootEntity;
     }
 
     public static <T> RootEntity<T> error(String errorMessage) {
         RootEntity<T> rootEntity = new RootEntity<>();
         rootEntity.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        rootEntity.setPayload(null);
         rootEntity.setErrorMessage(errorMessage);
         return rootEntity;
     }
@@ -35,7 +35,7 @@ public class RootEntity<T> {
     public static RootEntity<Void> ok() {
         RootEntity<Void> response = new RootEntity<>();
         response.setStatus(HttpStatus.OK.value());
-        response.setPayload(null);
+        response.setMessage("Success");
         return response;
     }
 }
