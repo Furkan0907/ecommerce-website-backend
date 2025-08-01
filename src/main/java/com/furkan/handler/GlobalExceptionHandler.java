@@ -59,6 +59,8 @@ public class GlobalExceptionHandler {
         exception.setCreateTime(new Date());
         exception.setHostName(getHostName());
 
+        exception.setMessage(message);
+
         apiError.setException(exception);
 
         return apiError;
