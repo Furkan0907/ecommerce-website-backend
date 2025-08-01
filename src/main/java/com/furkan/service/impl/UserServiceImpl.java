@@ -10,6 +10,7 @@ import com.furkan.repository.UserRepository;
 import com.furkan.service.IUserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,7 @@ public class UserServiceImpl implements IUserService {
         return dtoList;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #username == authentication.principal.username")
     @Override
     public DtoUser findUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
@@ -49,6 +51,7 @@ public class UserServiceImpl implements IUserService {
         return dtoTransformation(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #email == authentication.principal.email")
     @Override
     public DtoUser findUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
@@ -56,6 +59,7 @@ public class UserServiceImpl implements IUserService {
         return dtoTransformation(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @Override
     public DtoUser findUserById(Long id) {
         User user = userRepository.findById(id)
@@ -63,6 +67,7 @@ public class UserServiceImpl implements IUserService {
         return dtoTransformation(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @Override
     public DtoUser updateUserById(Long id, DtoUserIU dtoUserIU) {
         User user = userRepository.findById(id)
