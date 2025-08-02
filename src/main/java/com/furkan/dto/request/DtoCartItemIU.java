@@ -13,6 +13,9 @@ public class DtoCartItemIU {
     private Long productId;
 
     @NotNull
+    private Long cartId;
+
+    @NotNull
     @Min(1)
     private Integer quantity;
 }

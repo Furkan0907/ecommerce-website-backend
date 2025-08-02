@@ -8,15 +8,21 @@ import com.furkan.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyAuthoritiesMapper;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -42,10 +48,29 @@ public class AppConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("ADMIN").implies("SELLER")
+                .role("SELLER").implies("CUSTOMER")
+                .role("CUSTOMER").implies("USER")
+                .build();
+    }
+
+    @Bean
+    public GrantedAuthoritiesMapper authoritiesMapper(RoleHierarchy roleHierarchy) {
+        return new RoleHierarchyAuthoritiesMapper(roleHierarchy);
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(
+            UserDetailsService userDetailsService,
+            BCryptPasswordEncoder passwordEncoder,
+            GrantedAuthoritiesMapper authoritiesMapper
+    ) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService());
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setAuthoritiesMapper(authoritiesMapper);
         return provider;
     }
 
