@@ -21,6 +21,12 @@ public enum MessageType {
     PRODUCT_AVAILABILITY_NOT_FOUND("2006", "mevcut stokta ürün bulunamadı"),
     PRODUCT_FILTER_NOT_FOUND("2007", "verilen kriterde ürün bulunamadı"),
 
+    CART_NOT_FOUND("3001", "verilen id'li sepet bulunamadı"),
+    CART_LIST_IS_EMPTY("3002", "sistemde hiç kayıtlı sepet yok"),
+    NO_CARD_FOUND_FOR_THIS_USER("3003", "bu kullanıcıya sahip sepet bulunamadı"),
+
+    ITEM_NOT_FOUND_IN_CART("4001", "sepette bu idli ürün bulunamadı"),
+
     GENERAL_EXCEPTION("9999", "genel bir hata oluştu");
 
     String code;
