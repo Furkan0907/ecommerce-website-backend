@@ -1,0 +1,237 @@
+package com.furkan.service.impl;
+
+import com.furkan.dto.request.DtoOrderIU;
+import com.furkan.dto.request.DtoPaymentIU;
+import com.furkan.dto.response.*;
+import com.furkan.enums.OrderStatus;
+import com.furkan.exception.BaseException;
+import com.furkan.exception.ErrorMessage;
+import com.furkan.exception.MessageType;
+import com.furkan.model.*;
+import com.furkan.repository.CartRepository;
+import com.furkan.repository.OrderRepository;
+import com.furkan.repository.ProductRepository;
+import com.furkan.repository.UserRepository;
+import com.furkan.service.IOrderService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class OrderServiceImpl implements IOrderService {
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    private DtoOrder dtoConverter(Order order) {
+        DtoOrder dtoOrder = new DtoOrder();
+        BeanUtils.copyProperties(order, dtoOrder);
+
+        DtoUser dtoUser = new DtoUser();
+        BeanUtils.copyProperties(order.getUser(), dtoUser);
+        dtoOrder.setUser(dtoUser);
+
+        List<DtoOrderItem> dtoOrderItems = order.getOrderItems().stream().map(item -> {
+            DtoOrderItem dtoItem = new DtoOrderItem();
+            BeanUtils.copyProperties(item, dtoItem);
+            DtoProduct dtoProduct = new DtoProduct();
+            BeanUtils.copyProperties(item.getProduct(), dtoProduct);
+            dtoItem.setProduct(dtoProduct);
+            return dtoItem;
+        }).collect(Collectors.toList());
+
+        dtoOrder.setOrderItems(dtoOrderItems);
+
+        DtoPayment payment = new DtoPayment();
+        BeanUtils.copyProperties(order.getPayment(), payment);
+        payment.setUpdatedAt(new Date());
+        dtoOrder.setPayment(payment);
+
+        return dtoOrder;
+    }
+
+    @Override
+    public DtoOrder createOrder(DtoOrderIU input) {
+        User user = userRepository.findById(input.getUserId())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.USER_NOT_FOUND, input.getUserId().toString())));
+
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_CARD_FOUND_FOR_THIS_USER, user.getId().toString())));
+
+        List<CartItem> cartItems = cart.getCartItems();
+        if (cartItems.isEmpty()) {
+            throw new BaseException(new ErrorMessage(MessageType.CART_LIST_IS_EMPTY, null));
+        }
+
+        Order order = new Order();
+        order.setUser(user);
+        order.setCreatedAt(new Date());
+        order.setUpdatedAt(new Date());
+        order.setStatus(OrderStatus.PENDING);
+
+        List<OrderItem> orderItems = new ArrayList<>();
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (CartItem cartItem : cartItems) {
+            Product product = cartItem.getProduct();
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrder(order);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(cartItem.getQuantity());
+            orderItem.setPrice(product.getPrice());
+            orderItem.setCreatedAt(new Date());
+            orderItem.setUpdatedAt(new Date());
+
+            orderItems.add(orderItem);
+
+            totalAmount = totalAmount.add(product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+        }
+
+        order.setOrderItems(orderItems);
+        order.setTotalAmount(totalAmount);
+
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setAmount(totalAmount);
+        payment.setMethod(input.getPaymentMethod());
+        payment.setSuccess(false);
+
+        order.setPayment(payment);
+
+        cart.getCartItems().clear();
+        Order saved = orderRepository.save(order);
+
+        return dtoConverter(saved);
+    }
+
+    @Override
+    public DtoOrder findOrderById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, id.toString())));
+        return dtoConverter(order);
+    }
+
+    @Override
+    public List<DtoOrder> findAllOrders() {
+        List<DtoOrder> dtoList = new ArrayList<>();
+        List<Order> orderList = orderRepository.findAll();
+        for (Order order : orderList) {
+            dtoList.add(dtoConverter(order));
+        }
+        return dtoList;
+    }
+
+    @Override
+    public List<DtoOrder> findOrdersByUserId(Long userId) {
+        List<DtoOrder> dtoOrders = new ArrayList<>();
+        List<Order> orderList = orderRepository.findByUserId(userId);
+        for (Order order : orderList) {
+            dtoOrders.add(dtoConverter(order));
+        }
+        return dtoOrders;
+    }
+
+    @Override
+    public DtoOrder updateOrder(Long id, DtoOrderIU input) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, id.toString())));
+
+        if (!order.getUser().getId().equals(input.getUserId())) {
+            throw new BaseException(new ErrorMessage(MessageType.NO_ORDER_FOUND_FOR_THIS_USER, input.getUserId().toString()));
+        }
+
+        if (order.getStatus().equals(OrderStatus.COMPLETED)) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_COMPLETED, id.toString()));
+        }
+
+        if (order.getStatus().equals(OrderStatus.CANCELLED)) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_CANCELLED, id.toString()));
+        }
+
+        Payment payment = order.getPayment();
+        payment.setMethod(input.getPaymentMethod());
+
+        order.setUpdatedAt(new Date());
+
+        Order updated = orderRepository.save(order);
+        return dtoConverter(updated);
+    }
+
+    @Override
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, id.toString())));
+        orderRepository.delete(order);
+    }
+
+    @Override
+    public DtoOrder confirmOrderPayment(Long orderId, DtoPaymentIU paymentInfo) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
+
+        if (order.getStatus().equals(OrderStatus.COMPLETED)) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_COMPLETED, orderId.toString()));
+        }
+
+        if (order.getStatus().equals(OrderStatus.CANCELLED)) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_CANCELLED, orderId.toString()));
+        }
+
+        Payment payment = order.getPayment();
+        payment.setAmount(order.getTotalAmount());
+        payment.setSuccess(true);
+        payment.setMethod(paymentInfo.getMethod());
+
+        order.setStatus(OrderStatus.COMPLETED);
+
+        order.setUpdatedAt(new Date());
+
+        Order saved = orderRepository.save(order);
+        return dtoConverter(saved);
+    }
+
+    @Override
+    public DtoOrder cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
+
+        if (order.getStatus().equals(OrderStatus.COMPLETED)) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_COMPLETED, orderId.toString()));
+        }
+
+        if (order.getStatus().equals(OrderStatus.CANCELLED)) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_CANCELLED, orderId.toString()));
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+
+        order.setUpdatedAt(new Date());
+
+        Order saved = orderRepository.save(order);
+        return dtoConverter(saved);
+    }
+
+    @Override
+    public OrderStatus getOrderStatus(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
+
+        return order.getStatus();
+    }
+}
