@@ -28,5 +28,6 @@ public class Payment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PaymentMethod method;
 
+    @Column(nullable = false)
     private boolean success;
 }

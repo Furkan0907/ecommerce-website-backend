@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DtoPayment extends DtoBase {
 
-    private DtoOrder order;
+    private Long orderId;
 
     private BigDecimal amount;
 
