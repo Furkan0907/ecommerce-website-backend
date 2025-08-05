@@ -34,6 +34,9 @@ public enum MessageType {
 
     ORDER_ITEM_NOT_FOUND("6001", "sipariş içinde böyle bir ürün bulunamadı"),
 
+    NO_PAYMENT_FOUND_FOR_THIS_ORDER("7001", "sipariş için ödeme bilgisi bulunamadı"),
+    PAYMENT_LIST_IS_EMPTY_FOR_THIS_USER("7002", "bu kullanıcının ödeme geçmişi bulunmamaktadır"),
+
     GENERAL_EXCEPTION("9999", "genel bir hata oluştu");
 
     String code;

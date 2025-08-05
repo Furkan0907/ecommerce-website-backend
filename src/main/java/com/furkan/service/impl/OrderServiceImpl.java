@@ -106,14 +106,6 @@ public class OrderServiceImpl implements IOrderService {
         order.setOrderItems(orderItems);
         order.setTotalAmount(totalAmount);
 
-        Payment payment = new Payment();
-        payment.setOrder(order);
-        payment.setAmount(totalAmount);
-        payment.setMethod(input.getPaymentMethod());
-        payment.setSuccess(false);
-
-        order.setPayment(payment);
-
         cart.getCartItems().clear();
         Order saved = orderRepository.save(order);
 
@@ -163,9 +155,6 @@ public class OrderServiceImpl implements IOrderService {
         if (order.getStatus().equals(OrderStatus.CANCELLED)) {
             throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_CANCELLED, id.toString()));
         }
-
-        Payment payment = order.getPayment();
-        payment.setMethod(input.getPaymentMethod());
 
         order.setUpdatedAt(new Date());
 
