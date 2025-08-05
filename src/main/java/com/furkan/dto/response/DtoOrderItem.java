@@ -19,6 +19,4 @@ public class DtoOrderItem extends DtoBase {
     private Integer quantity;
 
     private BigDecimal price;
-
-    private DtoOrder order;
 }

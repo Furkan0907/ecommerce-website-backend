@@ -1,7 +1,6 @@
 package com.furkan.dto.request;
 
 import com.furkan.enums.PaymentMethod;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,10 +16,6 @@ public class DtoPaymentIU {
 
     @NotNull
     private Long orderId;
-
-    @NotNull
-    @DecimalMin("0.0")
-    private BigDecimal amount;
 
     @NotNull
     private PaymentMethod method;

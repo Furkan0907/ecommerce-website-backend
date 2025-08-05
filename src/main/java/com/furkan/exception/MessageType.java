@@ -27,6 +27,13 @@ public enum MessageType {
 
     ITEM_NOT_FOUND_IN_CART("4001", "sepette bu idli ürün bulunamadı"),
 
+    ORDER_NOT_FOUND("5001", "böyle bir sipariş bulunamadı"),
+    NO_ORDER_FOUND_FOR_THIS_USER("5002", "bu userId li kullancıda böyle bir sipariş bulunamadı"),
+    ORDER_ALREADY_COMPLETED("5003", "sipariş zaten teslim edilmiş"),
+    ORDER_ALREADY_CANCELLED("5004", "bu sipariş iptal edilmiş"),
+
+    ORDER_ITEM_NOT_FOUND("6001", "sipariş içinde böyle bir ürün bulunamadı"),
+
     GENERAL_EXCEPTION("9999", "genel bir hata oluştu");
 
     String code;
