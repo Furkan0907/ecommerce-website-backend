@@ -1,6 +1,7 @@
 package com.furkan.dto.response;
 
 import com.furkan.dto.DtoBase;
+import com.furkan.enums.RefundRequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,12 +13,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DtoRefundRequest extends DtoBase {
 
-    private DtoUser user;
-
-
     private DtoOrder order;
 
     private String reason;
 
-    private boolean approved;
+    private RefundRequestStatus status;
 }

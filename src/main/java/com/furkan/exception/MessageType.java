@@ -37,6 +37,11 @@ public enum MessageType {
     NO_PAYMENT_FOUND_FOR_THIS_ORDER("7001", "sipariş için ödeme bilgisi bulunamadı"),
     PAYMENT_LIST_IS_EMPTY_FOR_THIS_USER("7002", "bu kullanıcının ödeme geçmişi bulunmamaktadır"),
 
+    REFUND_REQUEST_NOT_FOUND("8001", "iade talebi bulunamadı"),
+    REFUND_REQUEST_LIST_IS_EMPTY("8002", "hiçbir iade talebi yok"),
+    NO_REFUND_REQUEST_FOUND_FOR_THIS_USER("8003", "bu kullanıcıya ait iade isteği yok"),
+    REFUND_REQUEST_ALREADY_BEEN_HANDLED("8004", "iade talebi zaten sonuçlandırılmış"),
+
     GENERAL_EXCEPTION("9999", "genel bir hata oluştu");
 
     String code;

@@ -1,5 +1,6 @@
 package com.furkan.model;
 
+import com.furkan.enums.RefundRequestStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,5 +26,7 @@ public class RefundRequest extends BaseEntity {
     @Column(nullable = false)
     private String reason;
 
-    private boolean approved = false;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RefundRequestStatus status = RefundRequestStatus.PENDING;
 }
