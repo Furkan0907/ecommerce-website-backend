@@ -2,11 +2,13 @@ package com.furkan.service;
 
 import com.furkan.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service("securityService")
+@EnableMethodSecurity
 public class SecurityService {
 
     @Autowired
@@ -29,6 +31,9 @@ public class SecurityService {
 
     @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired
+    private ComplaintRepository complaintRepository;
 
     public boolean isCartItemOwner(Long cartItemId, String username) {
         return cartItemRepository.findById(cartItemId)
@@ -152,6 +157,25 @@ public class SecurityService {
 
         return reviewRepository.findById(reviewId)
                 .map(r -> r.getUser().getUsername().equals(currentUsername))
+                .orElse(false);
+    }
+
+    public boolean canAccessUser(Long userId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        return isAdmin || userRepository.findById(userId)
+                .map(user -> user.getUsername().equals(currentUsername))
+                .orElse(false);
+    }
+
+    public boolean isComplaintOwner(Long complaintId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+        return complaintRepository.findById(complaintId)
+                .map(complaint -> complaint.getUser().getUsername().equals(currentUsername))
                 .orElse(false);
     }
 }

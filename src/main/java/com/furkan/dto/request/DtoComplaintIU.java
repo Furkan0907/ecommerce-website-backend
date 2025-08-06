@@ -13,5 +13,8 @@ public class DtoComplaintIU {
     private Long userId;
 
     @NotBlank
-    private String message;
+    private String subject;
+
+    @NotBlank
+    private String description;
 }

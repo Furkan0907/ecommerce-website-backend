@@ -14,7 +14,9 @@ public class DtoComplaint extends DtoBase {
 
     private DtoUser user;
 
-    private String message;
+    private String subject;
+
+    private String description;
 
     private boolean resolved;
 }
