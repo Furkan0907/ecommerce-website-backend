@@ -47,6 +47,9 @@ public enum MessageType {
     USER_NOT_BOUGHT_PRODUCT("9003", "kullanıcı bu ürünü almadan ürüne yorum yapamaz"),
     ALREADY_REVIEWED("9004", "kullanıcı bir ürün için en fazla bir yorum yapabilir"),
 
+    COMPLAINT_NOT_FOUND("9501", "şikayet bulunamadı"),
+    COMPLAINT_IS_ALREADY_RESOLVED("9502", "şikayet zaten çözülmüş"),
+
     GENERAL_EXCEPTION("9999", "genel bir hata oluştu");
 
     String code;
