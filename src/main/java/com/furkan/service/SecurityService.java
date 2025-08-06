@@ -27,6 +27,9 @@ public class SecurityService {
     @Autowired
     private RefundRequestRepository refundRequestRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
     public boolean isCartItemOwner(Long cartItemId, String username) {
         return cartItemRepository.findById(cartItemId)
                 .map(cartItem -> {
@@ -140,6 +143,15 @@ public class SecurityService {
         return refundRequestRepository
                 .findById(refundRequestId)
                 .map(r -> r.getUser().getId().equals(userId))
+                .orElse(false);
+    }
+
+    public boolean isReviewOwner(Long reviewId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+
+        return reviewRepository.findById(reviewId)
+                .map(r -> r.getUser().getUsername().equals(currentUsername))
                 .orElse(false);
     }
 }
