@@ -42,6 +42,11 @@ public enum MessageType {
     NO_REFUND_REQUEST_FOUND_FOR_THIS_USER("8003", "bu kullanıcıya ait iade isteği yok"),
     REFUND_REQUEST_ALREADY_BEEN_HANDLED("8004", "iade talebi zaten sonuçlandırılmış"),
 
+    REVIEW_NOT_FOUND("9001", "ürün için böyle bir yorum bulunamadı"),
+    NO_REVIEW_FOUND_FOR_THIS_USER("9002", "bu kullanıcının yaptığı yorum bulunamadı"),
+    USER_NOT_BOUGHT_PRODUCT("9003", "kullanıcı bu ürünü almadan ürüne yorum yapamaz"),
+    ALREADY_REVIEWED("9004", "kullanıcı bir ürün için en fazla bir yorum yapabilir"),
+
     GENERAL_EXCEPTION("9999", "genel bir hata oluştu");
 
     String code;
