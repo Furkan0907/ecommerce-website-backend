@@ -15,6 +15,7 @@ import com.furkan.repository.ProductRepository;
 import com.furkan.repository.ReviewRepository;
 import com.furkan.repository.UserRepository;
 import com.furkan.service.IReviewService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ReviewServiceImpl implements IReviewService {
 
     @Autowired

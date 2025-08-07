@@ -2,6 +2,7 @@ package com.furkan.service;
 
 import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.DtoPayment;
+import com.furkan.enums.PaymentStatus;
 
 import java.util.List;
 
@@ -14,4 +15,8 @@ public interface IPaymentService {
     List<DtoPayment> findPaymentsByUserId(Long userId);
 
     boolean hasSuccessfulPayment(Long orderId);
+
+    DtoPayment updatePaymentStatus(Long orderId, PaymentStatus newStatus, String transactionId);
+
+    DtoPayment refundPayment(Long orderId);
 }

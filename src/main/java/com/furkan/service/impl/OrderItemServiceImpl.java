@@ -13,6 +13,7 @@ import com.furkan.repository.OrderItemRepository;
 import com.furkan.repository.OrderRepository;
 import com.furkan.repository.ProductRepository;
 import com.furkan.service.IOrderItemService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class OrderItemServiceImpl implements IOrderItemService {
 
     @Autowired

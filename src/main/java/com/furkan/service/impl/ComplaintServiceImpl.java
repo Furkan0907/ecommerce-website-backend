@@ -11,6 +11,7 @@ import com.furkan.model.User;
 import com.furkan.repository.ComplaintRepository;
 import com.furkan.repository.UserRepository;
 import com.furkan.service.IComplaintService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Transactional
 public class ComplaintServiceImpl implements IComplaintService {
 
     @Autowired

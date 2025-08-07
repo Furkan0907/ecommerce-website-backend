@@ -1,7 +1,6 @@
 package com.furkan.service.impl;
 
 import com.furkan.dto.request.DtoOrderIU;
-import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.*;
 import com.furkan.enums.OrderStatus;
 import com.furkan.exception.BaseException;
@@ -10,6 +9,7 @@ import com.furkan.exception.MessageType;
 import com.furkan.model.*;
 import com.furkan.repository.*;
 import com.furkan.service.IOrderService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class OrderServiceImpl implements IOrderService {
 
     @Autowired
@@ -182,7 +183,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public DtoOrder confirmOrderPayment(Long orderId, DtoPaymentIU paymentInfo) {
+    public DtoOrder confirmOrderPayment(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
 
@@ -208,13 +209,7 @@ public class OrderServiceImpl implements IOrderService {
             productRepository.save(product);
         }
 
-        Payment payment = order.getPayment();
-        payment.setAmount(order.getTotalAmount());
-        payment.setSuccess(true);
-        payment.setMethod(paymentInfo.getMethod());
-
         order.setStatus(OrderStatus.CONFIRMED);
-
         order.setUpdatedAt(new Date());
 
         Order saved = orderRepository.save(order);

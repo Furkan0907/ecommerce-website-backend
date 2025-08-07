@@ -22,7 +22,7 @@ public interface IRestOrderController {
 
     RootEntity<Void> deleteOrder(Long id);
 
-    RootEntity<DtoOrder> confirmOrderPayment(Long orderId, DtoPaymentIU paymentInfo);
+    RootEntity<DtoOrder> confirmOrderPayment(Long orderId);
 
     RootEntity<DtoOrder> cancelOrder(Long orderId);
 

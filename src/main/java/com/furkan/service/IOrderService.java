@@ -21,7 +21,7 @@ public interface IOrderService {
 
     void deleteOrder(Long id);
 
-    DtoOrder confirmOrderPayment(Long orderId, DtoPaymentIU paymentInfo);
+    DtoOrder confirmOrderPayment(Long orderId);
 
     DtoOrder cancelOrder(Long orderId);
 

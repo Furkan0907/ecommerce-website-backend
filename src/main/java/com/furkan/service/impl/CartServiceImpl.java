@@ -18,6 +18,7 @@ import com.furkan.repository.ProductRepository;
 import com.furkan.repository.UserRepository;
 import com.furkan.service.ICartItemService;
 import com.furkan.service.ICartService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.prefs.BackingStoreException;
 
 @Service
+@Transactional
 public class CartServiceImpl implements ICartService {
 
     @Autowired

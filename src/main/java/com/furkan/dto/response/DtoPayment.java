@@ -2,6 +2,7 @@ package com.furkan.dto.response;
 
 import com.furkan.dto.DtoBase;
 import com.furkan.enums.PaymentMethod;
+import com.furkan.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,5 +22,7 @@ public class DtoPayment extends DtoBase {
 
     private PaymentMethod method;
 
-    private boolean success;
+    private String transactionId;
+
+    private PaymentStatus status;
 }
