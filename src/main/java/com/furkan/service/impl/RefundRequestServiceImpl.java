@@ -3,6 +3,7 @@ package com.furkan.service.impl;
 import com.furkan.dto.request.DtoRefundRequestIU;
 import com.furkan.dto.response.DtoOrder;
 import com.furkan.dto.response.DtoRefundRequest;
+import com.furkan.enums.OrderStatus;
 import com.furkan.enums.RefundRequestStatus;
 import com.furkan.exception.BaseException;
 import com.furkan.exception.ErrorMessage;
@@ -63,6 +64,9 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         refundRequest.setCreatedAt(new Date());
         refundRequest.setUpdatedAt(new Date());
 
+        order.setStatus(OrderStatus.RETURN_REQUESTED);
+        orderRepository.save(order);
+
         RefundRequest saved = refundRequestRepository.save(refundRequest);
         return dtoConverter(saved);
     }
@@ -101,7 +105,7 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
     }
 
     private void checkStatusPending(RefundRequestStatus status) {
-        if (status.equals(RefundRequestStatus.PENDING)) {
+        if (!status.equals(RefundRequestStatus.PENDING)) {
             throw new BaseException(new ErrorMessage(MessageType.REFUND_REQUEST_ALREADY_BEEN_HANDLED, null));
         }
     }
@@ -116,6 +120,10 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         refundRequest.setStatus(RefundRequestStatus.APPROVED);
         refundRequest.setUpdatedAt(new Date());
         RefundRequest saved = refundRequestRepository.save(refundRequest);
+
+        Order order = refundRequest.getOrder();
+        order.setStatus(OrderStatus.REFUNDED);
+        orderRepository.save(order);
         return dtoConverter(saved);
     }
 
@@ -129,6 +137,10 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         refundRequest.setStatus(RefundRequestStatus.REJECTED);
         refundRequest.setUpdatedAt(new Date());
         RefundRequest saved = refundRequestRepository.save(refundRequest);
+
+        Order order = refundRequest.getOrder();
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
         return dtoConverter(saved);
     }
 
@@ -142,6 +154,10 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         refundRequest.setStatus(RefundRequestStatus.CANCELLED);
         refundRequest.setUpdatedAt(new Date());
         RefundRequest saved = refundRequestRepository.save(refundRequest);
+
+        Order order = refundRequest.getOrder();
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
         return dtoConverter(saved);
     }
 }

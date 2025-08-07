@@ -18,6 +18,8 @@ public class DtoOrder extends DtoBase {
 
     private DtoUser user;
 
+    private DtoAddress address;
+
     private List<DtoOrderItem> orderItems;
 
     private BigDecimal totalAmount;

@@ -1,11 +1,14 @@
 package com.furkan.service;
 
+import com.furkan.model.User;
 import com.furkan.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service("securityService")
 @EnableMethodSecurity
@@ -34,6 +37,9 @@ public class SecurityService {
 
     @Autowired
     private ComplaintRepository complaintRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     public boolean isCartItemOwner(Long cartItemId, String username) {
         return cartItemRepository.findById(cartItemId)
@@ -176,6 +182,30 @@ public class SecurityService {
         String currentUsername = auth.getName();
         return complaintRepository.findById(complaintId)
                 .map(complaint -> complaint.getUser().getUsername().equals(currentUsername))
+                .orElse(false);
+    }
+
+    public boolean isOwnerOrAdmin(Long userId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) return false;
+
+        String username = auth.getName();
+
+        if (auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return true;
+        }
+
+        Optional<User> user = userRepository.findByUsername(username);
+        return user.map(u -> u.getId().equals(userId)).orElse(false);
+    }
+
+    public boolean isAddressOwner(Long addressId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+        return addressRepository.findById(addressId)
+                .map(address -> address.getUser().getUsername().equals(currentUsername))
                 .orElse(false);
     }
 }

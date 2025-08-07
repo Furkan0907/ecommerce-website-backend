@@ -1,17 +1,25 @@
 package com.furkan.dto.request;
 
-import com.furkan.enums.PaymentMethod;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class DtoOrderIU {
+public class DtoAddressIU {
 
     @NotNull
     private Long userId;
 
     @NotNull
-    private Long addressId;
+    private String city;
+
+    @NotNull
+    private String district;
+
+    @NotNull
+    private String fullAddress;
+
+    @NotNull
+    private String phoneNumber;
 }

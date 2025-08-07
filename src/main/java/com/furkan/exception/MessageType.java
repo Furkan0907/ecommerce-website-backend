@@ -13,6 +13,9 @@ public enum MessageType {
     EMAIL_NOT_FOUND("1009", "kayıtlı email bulunamadı"),
     REFRESH_TOKEN_NOT_FOUND("1003", "refresh token bulunamadı"),
 
+    NO_ADDRESS_FOUND_FOR_THIS_USER("1501", "bu kullanıcıya ait adres bulunamadı"),
+    ADDRESS_NOT_FOUND("1502", "bu id ye sahip adres bulunamadı"),
+
     PRODUCT_NOT_FOUND("2001", "verilen id'li ürün bulunamadı"),
     PRODUCT_NAME_NOT_FOUND("2002", "verilen isimli ürün bulunamadı"),
     PRODUCT_BRAND_NOT_FOUND("2003", "verilen markalı ürün bulunamadı"),
@@ -20,6 +23,7 @@ public enum MessageType {
     PRODUCT_PRICE_BETWEEN_NOT_FOUND("2005", "verilen miktar aralığında ürün bulunamadı"),
     PRODUCT_AVAILABILITY_NOT_FOUND("2006", "mevcut stokta ürün bulunamadı"),
     PRODUCT_FILTER_NOT_FOUND("2007", "verilen kriterde ürün bulunamadı"),
+    OUT_OF_STOCK("2008", "ürünün talep edilen kadar stok durumu yoktur"),
 
     CART_NOT_FOUND("3001", "verilen id'li sepet bulunamadı"),
     CART_LIST_IS_EMPTY("3002", "sistemde hiç kayıtlı sepet yok"),
@@ -31,6 +35,9 @@ public enum MessageType {
     NO_ORDER_FOUND_FOR_THIS_USER("5002", "bu userId li kullancıda böyle bir sipariş bulunamadı"),
     ORDER_ALREADY_COMPLETED("5003", "sipariş zaten teslim edilmiş"),
     ORDER_ALREADY_CANCELLED("5004", "bu sipariş iptal edilmiş"),
+    ORDER_IS_NOT_PENDING("5005", "sipariş ödenmiş"),
+    ORDER_MUST_BE_CONFIRMED("5006", "sipariş ödemesi yapılmadan kargoya verilemiyor"),
+    ORDER_MUST_BE_SHIPPED("5007", "sipariş daha kargoya verilmedi"),
 
     ORDER_ITEM_NOT_FOUND("6001", "sipariş içinde böyle bir ürün bulunamadı"),
 

@@ -26,4 +26,8 @@ public interface IOrderService {
     DtoOrder cancelOrder(Long orderId);
 
     OrderStatus getOrderStatus(Long orderId);
+
+    DtoOrder markOrderShipped(Long orderId);
+
+    DtoOrder deliverOrder(Long orderId);
 }

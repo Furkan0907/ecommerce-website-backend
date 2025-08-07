@@ -27,4 +27,8 @@ public interface IRestOrderController {
     RootEntity<DtoOrder> cancelOrder(Long orderId);
 
     RootEntity<OrderStatus> getOrderStatus(Long orderId);
+
+    RootEntity<DtoOrder> markOrderShipped(Long orderId);
+
+    RootEntity<DtoOrder> deliverOrder(Long orderId);
 }

@@ -8,10 +8,7 @@ import com.furkan.exception.BaseException;
 import com.furkan.exception.ErrorMessage;
 import com.furkan.exception.MessageType;
 import com.furkan.model.*;
-import com.furkan.repository.CartRepository;
-import com.furkan.repository.OrderRepository;
-import com.furkan.repository.ProductRepository;
-import com.furkan.repository.UserRepository;
+import com.furkan.repository.*;
 import com.furkan.service.IOrderService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +35,9 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired
     private CartRepository cartRepository;
 
+    @Autowired
+    private AddressRepository addressRepository;
+
     private DtoOrder dtoConverter(Order order) {
         DtoOrder dtoOrder = new DtoOrder();
         BeanUtils.copyProperties(order, dtoOrder);
@@ -45,6 +45,10 @@ public class OrderServiceImpl implements IOrderService {
         DtoUser dtoUser = new DtoUser();
         BeanUtils.copyProperties(order.getUser(), dtoUser);
         dtoOrder.setUser(dtoUser);
+
+        DtoAddress dtoAddress = new DtoAddress();
+        BeanUtils.copyProperties(order.getAddress(), dtoAddress);
+        dtoOrder.setAddress(dtoAddress);
 
         List<DtoOrderItem> dtoOrderItems = order.getOrderItems().stream().map(item -> {
             DtoOrderItem dtoItem = new DtoOrderItem();
@@ -73,6 +77,9 @@ public class OrderServiceImpl implements IOrderService {
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_CARD_FOUND_FOR_THIS_USER, user.getId().toString())));
 
+        Address address = addressRepository.findById(input.getAddressId())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ADDRESS_NOT_FOUND, input.getAddressId().toString())));
+
         List<CartItem> cartItems = cart.getCartItems();
         if (cartItems.isEmpty()) {
             throw new BaseException(new ErrorMessage(MessageType.CART_LIST_IS_EMPTY, null));
@@ -83,6 +90,7 @@ public class OrderServiceImpl implements IOrderService {
         order.setCreatedAt(new Date());
         order.setUpdatedAt(new Date());
         order.setStatus(OrderStatus.PENDING);
+        order.setAddress(address);
 
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -106,8 +114,9 @@ public class OrderServiceImpl implements IOrderService {
         order.setOrderItems(orderItems);
         order.setTotalAmount(totalAmount);
 
-        cart.getCartItems().clear();
         Order saved = orderRepository.save(order);
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
 
         return dtoConverter(saved);
     }
@@ -148,7 +157,7 @@ public class OrderServiceImpl implements IOrderService {
             throw new BaseException(new ErrorMessage(MessageType.NO_ORDER_FOUND_FOR_THIS_USER, input.getUserId().toString()));
         }
 
-        if (order.getStatus().equals(OrderStatus.COMPLETED)) {
+        if (order.getStatus().equals(OrderStatus.DELIVERED)) {
             throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_COMPLETED, id.toString()));
         }
 
@@ -156,6 +165,9 @@ public class OrderServiceImpl implements IOrderService {
             throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_CANCELLED, id.toString()));
         }
 
+        Address address = addressRepository.findById(input.getAddressId())
+                        .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ADDRESS_NOT_FOUND, input.getAddressId().toString())));
+        order.setAddress(address);
         order.setUpdatedAt(new Date());
 
         Order updated = orderRepository.save(order);
@@ -174,12 +186,26 @@ public class OrderServiceImpl implements IOrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
 
-        if (order.getStatus().equals(OrderStatus.COMPLETED)) {
-            throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_COMPLETED, orderId.toString()));
-        }
 
         if (order.getStatus().equals(OrderStatus.CANCELLED)) {
             throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_CANCELLED, orderId.toString()));
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_IS_NOT_PENDING, orderId.toString()));
+        }
+
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = item.getProduct();
+            if (product.getStockQuantity() < item.getQuantity()) {
+                throw new BaseException(new ErrorMessage(MessageType.OUT_OF_STOCK, product.getId().toString()));
+            }
+        }
+
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = item.getProduct();
+            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+            productRepository.save(product);
         }
 
         Payment payment = order.getPayment();
@@ -187,7 +213,7 @@ public class OrderServiceImpl implements IOrderService {
         payment.setSuccess(true);
         payment.setMethod(paymentInfo.getMethod());
 
-        order.setStatus(OrderStatus.COMPLETED);
+        order.setStatus(OrderStatus.CONFIRMED);
 
         order.setUpdatedAt(new Date());
 
@@ -200,7 +226,7 @@ public class OrderServiceImpl implements IOrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
 
-        if (order.getStatus().equals(OrderStatus.COMPLETED)) {
+        if (order.getStatus().equals(OrderStatus.DELIVERED)) {
             throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_COMPLETED, orderId.toString()));
         }
 
@@ -222,5 +248,33 @@ public class OrderServiceImpl implements IOrderService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
 
         return order.getStatus();
+    }
+
+    @Override
+    public DtoOrder markOrderShipped(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
+
+        if (!order.getStatus().equals(OrderStatus.CONFIRMED)) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_MUST_BE_CONFIRMED, orderId.toString()));
+        }
+
+        order.setStatus(OrderStatus.SHIPPED);
+        order.setUpdatedAt(new Date());
+        return dtoConverter(orderRepository.save(order));
+    }
+
+    @Override
+    public DtoOrder deliverOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
+
+        if (!order.getStatus().equals(OrderStatus.SHIPPED)) {
+            throw new BaseException(new ErrorMessage(MessageType.ORDER_MUST_BE_SHIPPED, orderId.toString()));
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        order.setUpdatedAt(new Date());
+        return dtoConverter(orderRepository.save(order));
     }
 }

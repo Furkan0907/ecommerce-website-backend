@@ -3,12 +3,10 @@ package com.furkan.enums;
 public enum OrderStatus {
 
     PENDING,
-    COMPLETED,
+    CONFIRMED,
     CANCELLED,
-    PROCESSING,
     SHIPPED,
     DELIVERED,
     RETURN_REQUESTED,
-    RETURNED,
     REFUNDED
 }
