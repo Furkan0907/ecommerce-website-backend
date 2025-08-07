@@ -27,6 +27,12 @@ public class SecurityConfig {
     public static final String REFRESH_TOKEN = BASEURL + "/refresh-token";
     public static final String LOGOUT = BASEURL + "/logout";
 
+    public static final String[]  SWAGGER_PATHS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-ui.html"
+    };
+
     @Autowired
     private AuthenticationProvider authenticationProvider;
 
@@ -41,6 +47,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(REGISTER, AUTHENTICATE, REFRESH_TOKEN, LOGOUT).permitAll()
+
+                        .requestMatchers(SWAGGER_PATHS).permitAll()
 
                         .requestMatchers(HttpMethod.GET, "api/products", "/api/products/search/by-name").permitAll()
 
