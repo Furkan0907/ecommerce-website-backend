@@ -22,6 +22,10 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id", nullable = false)
+    private Address address;
+
     @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
 
