@@ -4,6 +4,7 @@ import com.furkan.controller.IRestPaymentController;
 import com.furkan.controller.RestBaseController;
 import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.DtoPayment;
+import com.furkan.enums.PaymentStatus;
 import com.furkan.service.IPaymentService;
 import com.furkan.utils.RootEntity;
 import jakarta.validation.Valid;
@@ -46,5 +47,20 @@ public class RestPaymentControllerImpl extends RestBaseController implements IRe
     @Override
     public RootEntity<Boolean> hasSuccessfulPayment(@PathVariable Long orderId) {
         return ok(paymentService.hasSuccessfulPayment(orderId));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{orderId}/status")
+    @Override
+    public RootEntity<DtoPayment> updatePaymentStatus(@PathVariable Long orderId, @RequestParam PaymentStatus newStatus,
+                                                      @RequestParam String transactionId) {
+        return ok(paymentService.updatePaymentStatus(orderId, newStatus, transactionId));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{orderId}/refund")
+    @Override
+    public RootEntity<DtoPayment> refundPayment(@PathVariable Long orderId) {
+        return ok(paymentService.refundPayment(orderId));
     }
 }

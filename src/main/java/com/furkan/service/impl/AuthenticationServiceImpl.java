@@ -16,6 +16,7 @@ import com.furkan.model.User;
 import com.furkan.repository.RefreshTokenRepository;
 import com.furkan.repository.UserRepository;
 import com.furkan.service.IAuthenticationService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -28,8 +29,8 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.UUID;
 
-
 @Service
+@Transactional
 public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Autowired

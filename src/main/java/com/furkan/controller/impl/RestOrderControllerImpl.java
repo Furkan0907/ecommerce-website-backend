@@ -68,8 +68,8 @@ public class RestOrderControllerImpl extends RestBaseController implements IRest
     @PreAuthorize("@securityService.canAccessOrder(#orderId) and @securityService.isOnlyCustomer()")
     @PutMapping("/{orderId}/confirm-payment")
     @Override
-    public RootEntity<DtoOrder> confirmOrderPayment(@PathVariable Long orderId, @Valid @RequestBody DtoPaymentIU paymentInfo) {
-        return ok(orderService.confirmOrderPayment(orderId, paymentInfo));
+    public RootEntity<DtoOrder> confirmOrderPayment(@PathVariable Long orderId) {
+        return ok(orderService.confirmOrderPayment(orderId));
     }
 
     @PreAuthorize("@securityService.canAccessOrder(#orderId) and @securityService.isOnlyCustomer()")

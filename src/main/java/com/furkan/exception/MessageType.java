@@ -43,6 +43,10 @@ public enum MessageType {
 
     NO_PAYMENT_FOUND_FOR_THIS_ORDER("7001", "sipariş için ödeme bilgisi bulunamadı"),
     PAYMENT_LIST_IS_EMPTY_FOR_THIS_USER("7002", "bu kullanıcının ödeme geçmişi bulunmamaktadır"),
+    PAYMENT_ALREADY_COMPLETED("7003", "ödeme yapılmış"),
+    PAYMENT_FAILED("7004", "ödeme işlemi başarılı olamadı"),
+    PAYMENT_NOT_COMPLETED("7005", "ödeme henüz tamamlanmadı"),
+    REFUND_FAILED("7006", "geri ödeme gerçekleştirilemedi"),
 
     REFUND_REQUEST_NOT_FOUND("8001", "iade talebi bulunamadı"),
     REFUND_REQUEST_LIST_IS_EMPTY("8002", "hiçbir iade talebi yok"),

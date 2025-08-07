@@ -8,12 +8,11 @@ import com.furkan.exception.MessageType;
 import com.furkan.model.Product;
 import com.furkan.repository.ProductRepository;
 import com.furkan.service.IProductService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Transactional
 public class ProductServiceImpl implements IProductService {
 
     @Autowired

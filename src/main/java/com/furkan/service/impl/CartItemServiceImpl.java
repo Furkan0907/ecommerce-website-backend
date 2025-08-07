@@ -15,6 +15,7 @@ import com.furkan.repository.CartItemRepository;
 import com.furkan.repository.CartRepository;
 import com.furkan.repository.ProductRepository;
 import com.furkan.service.ICartItemService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Transactional
 public class CartItemServiceImpl implements ICartItemService {
 
     @Autowired

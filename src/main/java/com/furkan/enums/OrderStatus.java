@@ -8,5 +8,6 @@ public enum OrderStatus {
     SHIPPED,
     DELIVERED,
     RETURN_REQUESTED,
+    RETURNED,
     REFUNDED
 }

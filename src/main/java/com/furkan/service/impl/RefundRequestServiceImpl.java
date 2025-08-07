@@ -15,6 +15,7 @@ import com.furkan.repository.OrderRepository;
 import com.furkan.repository.RefundRequestRepository;
 import com.furkan.repository.UserRepository;
 import com.furkan.service.IRefundRequestService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Transactional
 public class RefundRequestServiceImpl implements IRefundRequestService {
 
     @Autowired
@@ -122,7 +124,7 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         RefundRequest saved = refundRequestRepository.save(refundRequest);
 
         Order order = refundRequest.getOrder();
-        order.setStatus(OrderStatus.REFUNDED);
+        order.setStatus(OrderStatus.RETURNED);
         orderRepository.save(order);
         return dtoConverter(saved);
     }
@@ -139,7 +141,7 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         RefundRequest saved = refundRequestRepository.save(refundRequest);
 
         Order order = refundRequest.getOrder();
-        order.setStatus(OrderStatus.COMPLETED);
+        order.setStatus(OrderStatus.DELIVERED);
         orderRepository.save(order);
         return dtoConverter(saved);
     }
@@ -156,7 +158,7 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         RefundRequest saved = refundRequestRepository.save(refundRequest);
 
         Order order = refundRequest.getOrder();
-        order.setStatus(OrderStatus.COMPLETED);
+        order.setStatus(OrderStatus.DELIVERED);
         orderRepository.save(order);
         return dtoConverter(saved);
     }

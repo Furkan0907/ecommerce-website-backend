@@ -1,6 +1,7 @@
 package com.furkan.model;
 
 import com.furkan.enums.PaymentMethod;
+import com.furkan.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,12 +23,17 @@ public class Payment extends BaseEntity {
     private Order order;
 
     @Column(nullable = false)
-    private BigDecimal amount;
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PaymentMethod method;
 
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
+
+    @Column(name = "transaction_id")
+    private String transactionId;
+
     @Column(nullable = false)
-    private boolean success;
+    private BigDecimal amount;
+
 }
