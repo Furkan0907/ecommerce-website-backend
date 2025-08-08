@@ -94,7 +94,7 @@ public class RestOrderControllerImpl extends RestBaseController implements IRest
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("{oderId}/deliver")
+    @PutMapping("{orderId}/deliver")
     @Override
     public RootEntity<DtoOrder> deliverOrder(@PathVariable Long orderId) {
         return ok(orderService.deliverOrder(orderId));

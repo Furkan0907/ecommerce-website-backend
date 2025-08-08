@@ -1,8 +1,7 @@
 package com.furkan.service.impl;
 
 import com.furkan.dto.request.DtoRefundRequestIU;
-import com.furkan.dto.response.DtoOrder;
-import com.furkan.dto.response.DtoRefundRequest;
+import com.furkan.dto.response.*;
 import com.furkan.enums.OrderStatus;
 import com.furkan.enums.RefundRequestStatus;
 import com.furkan.exception.BaseException;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -44,6 +44,43 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
 
         DtoOrder dtoOrder = new DtoOrder();
         BeanUtils.copyProperties(input.getOrder(), dtoOrder);
+
+
+        if (input.getOrder().getUser() != null) {
+            DtoUser dtoUser = new DtoUser();
+            BeanUtils.copyProperties(input.getOrder().getUser(), dtoUser);
+            dtoOrder.setUser(dtoUser);
+        }
+
+        if (input.getOrder().getOrderItems() != null) {
+            List<DtoOrderItem> dtoOrderItems = input.getOrder().getOrderItems().stream()
+                    .map(item -> {
+                        DtoOrderItem dtoItem = new DtoOrderItem();
+                        BeanUtils.copyProperties(item, dtoItem);
+
+                        if (item.getProduct() != null) {
+                            DtoProduct dtoProduct = new DtoProduct();
+                            BeanUtils.copyProperties(item.getProduct(), dtoProduct);
+                            dtoItem.setProduct(dtoProduct);
+                        }
+                        return dtoItem;
+                    }).collect(Collectors.toList());
+
+            dtoOrder.setOrderItems(dtoOrderItems);
+        }
+
+        if (input.getOrder().getAddress() != null) {
+            DtoAddress dtoAddress = new DtoAddress();
+            BeanUtils.copyProperties(input.getOrder().getAddress(), dtoAddress);
+            dtoOrder.setAddress(dtoAddress);
+        }
+
+        if (input.getOrder().getPayment() != null) {
+            DtoPayment dtoPayment = new DtoPayment();
+            BeanUtils.copyProperties(input.getOrder().getPayment(), dtoPayment);
+            dtoOrder.setPayment(dtoPayment);
+        }
+
         refundRequest.setOrder(dtoOrder);
 
         return refundRequest;

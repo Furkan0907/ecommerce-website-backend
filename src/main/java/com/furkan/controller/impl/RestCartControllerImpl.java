@@ -64,7 +64,7 @@ public class RestCartControllerImpl extends RestBaseController implements IRestC
         return ok(cartService.findCartByUserId(id));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(#userId)")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(@cartRepository.findByUserId(#userId).orElse(null)?.id)")
     @PostMapping("/{userId}/items")
     @Override
     public RootEntity<DtoCartItem> addItemToCart(@PathVariable(value = "userId") Long userId,
@@ -73,7 +73,7 @@ public class RestCartControllerImpl extends RestBaseController implements IRestC
         return ok(cartService.addItemToCart(userId, productId, quantity));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(#userId)")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(@cartRepository.findByUserId(#userId).orElse(null)?.id)")
     @PutMapping("/{userId}/items")
     @Override
     public RootEntity<DtoCartItem> updateItemQuantity(@PathVariable(value = "userId") Long userId,
@@ -82,7 +82,7 @@ public class RestCartControllerImpl extends RestBaseController implements IRestC
         return ok(cartService.updateItemQuantity(userId, productId, quantity));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(#userId)")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(@cartRepository.findByUserId(#userId).orElse(null)?.id)")
     @DeleteMapping("/{userId}/items")
     @Override
     public RootEntity<Void> removeItemFromCart(@PathVariable(value = "userId") Long userId,
@@ -91,7 +91,7 @@ public class RestCartControllerImpl extends RestBaseController implements IRestC
         return ok();
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(#userId)")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(@cartRepository.findByUserId(#userId).orElse(null)?.id)")
     @DeleteMapping("/{userId}/clear")
     @Override
     public RootEntity<Void> clearCart(@PathVariable(value = "userId") Long userId) {
@@ -99,7 +99,7 @@ public class RestCartControllerImpl extends RestBaseController implements IRestC
         return ok();
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(#userId)")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(#cartId)")
     @GetMapping("/{cartId}/items")
     @Override
     public RootEntity<List<DtoCartItem>> getCartItems(@PathVariable(value = "cartId") Long cartId) {
