@@ -1,9 +1,6 @@
 package com.furkan.service.impl;
 
-import com.furkan.dto.request.AuthRequest;
-import com.furkan.dto.request.LogoutRequest;
-import com.furkan.dto.request.RefreshTokenRequest;
-import com.furkan.dto.request.RegisterRequest;
+import com.furkan.dto.request.*;
 import com.furkan.dto.response.AuthResponse;
 import com.furkan.dto.response.DtoUser;
 import com.furkan.enums.Role;
@@ -16,6 +13,7 @@ import com.furkan.model.User;
 import com.furkan.repository.RefreshTokenRepository;
 import com.furkan.repository.UserRepository;
 import com.furkan.service.IAuthenticationService;
+import com.furkan.service.ICartService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +45,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
+    private ICartService cartService;
 
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
@@ -81,6 +82,12 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
         User user = createUser(input);
         User savedUser = userRepository.save(user);
+
+        if (savedUser.getRole() == Role.CUSTOMER) {
+            DtoCartIU dtoCart  = new DtoCartIU();
+            dtoCart.setUserId(savedUser.getId());
+            cartService.createCart(dtoCart);
+        }
 
         DtoUser dtoUser = new DtoUser();
         BeanUtils.copyProperties(savedUser, dtoUser);

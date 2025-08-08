@@ -43,29 +43,41 @@ public class OrderServiceImpl implements IOrderService {
         DtoOrder dtoOrder = new DtoOrder();
         BeanUtils.copyProperties(order, dtoOrder);
 
-        DtoUser dtoUser = new DtoUser();
-        BeanUtils.copyProperties(order.getUser(), dtoUser);
-        dtoOrder.setUser(dtoUser);
+        if (order.getUser() != null) {
+            DtoUser dtoUser = new DtoUser();
+            BeanUtils.copyProperties(order.getUser(), dtoUser);
+            dtoOrder.setUser(dtoUser);
+        }
 
-        DtoAddress dtoAddress = new DtoAddress();
-        BeanUtils.copyProperties(order.getAddress(), dtoAddress);
-        dtoOrder.setAddress(dtoAddress);
+        if (order.getAddress() != null) {
+            DtoAddress dtoAddress = new DtoAddress();
+            BeanUtils.copyProperties(order.getAddress(), dtoAddress);
+            dtoOrder.setAddress(dtoAddress);
+        }
 
-        List<DtoOrderItem> dtoOrderItems = order.getOrderItems().stream().map(item -> {
-            DtoOrderItem dtoItem = new DtoOrderItem();
-            BeanUtils.copyProperties(item, dtoItem);
-            DtoProduct dtoProduct = new DtoProduct();
-            BeanUtils.copyProperties(item.getProduct(), dtoProduct);
-            dtoItem.setProduct(dtoProduct);
-            return dtoItem;
-        }).collect(Collectors.toList());
+        if (order.getOrderItems() != null) {
+            List<DtoOrderItem> dtoOrderItems = order.getOrderItems().stream().map(item -> {
+                DtoOrderItem dtoItem = new DtoOrderItem();
+                BeanUtils.copyProperties(item, dtoItem);
 
-        dtoOrder.setOrderItems(dtoOrderItems);
+                if (item.getProduct() != null) {
+                    DtoProduct dtoProduct = new DtoProduct();
+                    BeanUtils.copyProperties(item.getProduct(), dtoProduct);
+                    dtoItem.setProduct(dtoProduct);
+                }
 
-        DtoPayment payment = new DtoPayment();
-        BeanUtils.copyProperties(order.getPayment(), payment);
-        payment.setUpdatedAt(new Date());
-        dtoOrder.setPayment(payment);
+                return dtoItem;
+            }).collect(Collectors.toList());
+
+            dtoOrder.setOrderItems(dtoOrderItems);
+        }
+
+        if (order.getPayment() != null) {
+            DtoPayment payment = new DtoPayment();
+            BeanUtils.copyProperties(order.getPayment(), payment);
+            payment.setUpdatedAt(new Date());
+            dtoOrder.setPayment(payment);
+        }
 
         return dtoOrder;
     }
