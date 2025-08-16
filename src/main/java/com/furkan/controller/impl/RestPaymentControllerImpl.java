@@ -5,8 +5,12 @@ import com.furkan.controller.RestBaseController;
 import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.DtoPayment;
 import com.furkan.enums.PaymentStatus;
+import com.furkan.exception.BaseException;
+import com.furkan.exception.ErrorMessage;
+import com.furkan.exception.MessageType;
 import com.furkan.service.IPaymentService;
 import com.furkan.utils.RootEntity;
+import com.stripe.exception.StripeException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -61,6 +65,17 @@ public class RestPaymentControllerImpl extends RestBaseController implements IRe
     @PutMapping("/{orderId}/refund")
     @Override
     public RootEntity<DtoPayment> refundPayment(@PathVariable Long orderId) {
-        return ok(paymentService.refundPayment(orderId));
+        try {
+            return ok(paymentService.refundPayment(orderId));
+        } catch (StripeException e) {
+            throw new BaseException(new ErrorMessage(MessageType.REFUND_FAILED, orderId.toString()));
+        }
+    }
+
+    @PostMapping("/webhook")
+    @Override
+    public RootEntity<Void> handleStripeWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
+        paymentService.handleStripeWebhook(payload, sigHeader);
+        return ok();
     }
 }

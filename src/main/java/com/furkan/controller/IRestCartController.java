@@ -3,6 +3,7 @@ package com.furkan.controller;
 import com.furkan.dto.request.DtoCartIU;
 import com.furkan.dto.response.DtoCart;
 import com.furkan.dto.response.DtoCartItem;
+import com.furkan.dto.response.DtoOrder;
 import com.furkan.utils.RootEntity;
 
 import java.util.List;
@@ -29,5 +30,7 @@ public interface IRestCartController {
 
     RootEntity<Void> clearCart(Long userId);
 
-    RootEntity<List<DtoCartItem>> getCartItems(Long cartId);
+    RootEntity<List<DtoCartItem>> getCartItems(Long userId);
+
+    RootEntity<DtoOrder> confirmCart(Long userId, Long addressId);
 }

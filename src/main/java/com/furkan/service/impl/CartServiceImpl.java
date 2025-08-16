@@ -1,10 +1,8 @@
 package com.furkan.service.impl;
 
 import com.furkan.dto.request.DtoCartIU;
-import com.furkan.dto.response.DtoCart;
-import com.furkan.dto.response.DtoCartItem;
-import com.furkan.dto.response.DtoProduct;
-import com.furkan.dto.response.DtoUser;
+import com.furkan.dto.request.DtoOrderIU;
+import com.furkan.dto.response.*;
 import com.furkan.exception.BaseException;
 import com.furkan.exception.ErrorMessage;
 import com.furkan.exception.MessageType;
@@ -18,6 +16,7 @@ import com.furkan.repository.ProductRepository;
 import com.furkan.repository.UserRepository;
 import com.furkan.service.ICartItemService;
 import com.furkan.service.ICartService;
+import com.furkan.service.IOrderService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +46,9 @@ public class CartServiceImpl implements ICartService {
 
     @Autowired
     private ICartItemService cartItemService;
+
+    @Autowired
+    private IOrderService orderService;
 
     private Optional<CartItem> findCartItem(Long cartId, Long productId) {
         return cartItemRepository.findByCartIdAndProductId(cartId, productId);
@@ -240,11 +242,15 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public List<DtoCartItem> getCartItems(Long cartId) {
-        if (!cartRepository.existsById(cartId)) {
-            throw new BaseException(new ErrorMessage(MessageType.CART_NOT_FOUND, cartId.toString()));
-        }
-        List<CartItem> items = cartItemRepository.findByCartId(cartId);
+    public List<DtoCartItem> getCartItems(Long userId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_CARD_FOUND_FOR_THIS_USER, userId.toString())));
+        List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
         return cartItemService.dtoListConverter(items);
+    }
+
+    @Override
+    public DtoOrder confirmCart(Long userId, Long addressId) {
+        return orderService.createOrder(new DtoOrderIU(userId, addressId));
     }
 }

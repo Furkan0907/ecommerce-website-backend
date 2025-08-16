@@ -12,6 +12,7 @@ public enum MessageType {
     EMAIL_ALREADY_EXISTS("1008", "bu email zaten kayıtlı"),
     EMAIL_NOT_FOUND("1009", "kayıtlı email bulunamadı"),
     REFRESH_TOKEN_NOT_FOUND("1003", "refresh token bulunamadı"),
+    INVALID_PASSWORD("1004", "şifre geçerli değil"),
 
     NO_ADDRESS_FOUND_FOR_THIS_USER("1501", "bu kullanıcıya ait adres bulunamadı"),
     ADDRESS_NOT_FOUND("1502", "bu id ye sahip adres bulunamadı"),
@@ -38,6 +39,7 @@ public enum MessageType {
     ORDER_IS_NOT_PENDING("5005", "sipariş ödenmiş"),
     ORDER_MUST_BE_CONFIRMED("5006", "sipariş ödemesi yapılmadan kargoya verilemiyor"),
     ORDER_MUST_BE_SHIPPED("5007", "sipariş daha kargoya verilmedi"),
+    CAN_NOT_CANCEL_ORDER("5008", "siparişi artık iptal edemez"),
 
     ORDER_ITEM_NOT_FOUND("6001", "sipariş içinde böyle bir ürün bulunamadı"),
 
@@ -47,6 +49,7 @@ public enum MessageType {
     PAYMENT_FAILED("7004", "ödeme işlemi başarılı olamadı"),
     PAYMENT_NOT_COMPLETED("7005", "ödeme henüz tamamlanmadı"),
     REFUND_FAILED("7006", "geri ödeme gerçekleştirilemedi"),
+    No_PENDING_PAYMENT_FOUND("7007", "işlenen ödeme bulunamadı"),
 
     REFUND_REQUEST_NOT_FOUND("8001", "iade talebi bulunamadı"),
     REFUND_REQUEST_LIST_IS_EMPTY("8002", "hiçbir iade talebi yok"),

@@ -10,6 +10,8 @@ public interface IRestAddressController {
 
     RootEntity<DtoAddress> saveAddress(DtoAddressIU input);
 
+    RootEntity<DtoAddress> findAddressById(Long id);
+
     RootEntity<List<DtoAddress>> findAddressByUserId(Long userId);
 
     RootEntity<DtoAddress> updateAddress(Long id, DtoAddressIU input);

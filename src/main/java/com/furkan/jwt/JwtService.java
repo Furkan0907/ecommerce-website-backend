@@ -1,5 +1,6 @@
 package com.furkan.jwt;
 
+import com.furkan.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -52,7 +53,14 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> claims = new HashMap<>();
+
+        if (userDetails instanceof User user) {
+            claims.put("id", user.getId());
+            claims.put("email", user.getEmail());
+        }
+
+        return generateToken(claims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extractClaims, UserDetails userDetails) {

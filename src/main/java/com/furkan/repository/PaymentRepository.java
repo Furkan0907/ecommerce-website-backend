@@ -1,5 +1,6 @@
 package com.furkan.repository;
 
+import com.furkan.enums.PaymentStatus;
 import com.furkan.model.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,8 +13,13 @@ import java.util.Optional;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    Optional<Payment> findByOrderId(Long orderId);
+    List<Payment> findByOrderId(Long orderId);
 
     @Query("SELECT p FROM Payment p WHERE p.order.user.id = :userId")
     List<Payment> findByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT p FROM Payment p WHERE p.order.id = :orderId AND p.status = :status")
+    List<Payment> findByOrderIdAndStatus(@Param("orderId") Long orderId, @Param("status") PaymentStatus status);
+
+    Optional<Payment> findByTransactionId(String transactionId);
 }

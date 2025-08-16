@@ -59,6 +59,13 @@ public class AddressServiceImpl implements IAddressService {
     }
 
     @Override
+    public DtoAddress findAddressById(Long id) {
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ADDRESS_NOT_FOUND, id.toString())));
+        return dtoConverter(address);
+    }
+
+    @Override
     public List<DtoAddress> findAddressByUserId(Long userId) {
         List<Address> addresses = addressRepository.findAllByUserId(userId);
         if (addresses.isEmpty()) {

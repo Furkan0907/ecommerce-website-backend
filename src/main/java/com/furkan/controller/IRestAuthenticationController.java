@@ -17,4 +17,8 @@ public interface IRestAuthenticationController {
     RootEntity<AuthResponse> refreshToken(RefreshTokenRequest input);
 
     RootEntity<Void> logout(LogoutRequest input);
+
+    RootEntity<Boolean> checkEmailExists(String email);
+
+    RootEntity<Void> resetPassword(String email, String newPassword);
 }

@@ -27,6 +27,13 @@ public class RestAddressControllerImpl extends RestBaseController implements IRe
         return ok(addressService.saveAddress(input));
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isAddressOwner(#id)")
+    @GetMapping("/{id}")
+    @Override
+    public RootEntity<DtoAddress> findAddressById(@PathVariable Long id) {
+        return ok(addressService.findAddressById(id));
+    }
+
     @PreAuthorize("@securityService.isOwnerOrAdmin(#userId)")
     @GetMapping("/user/{userId}")
     @Override
@@ -41,7 +48,7 @@ public class RestAddressControllerImpl extends RestBaseController implements IRe
         return ok(addressService.updateAddress(id, input));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.isOwner(#id)")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isAddressOwner(#id)")
     @DeleteMapping("/{id}")
     @Override
     public RootEntity<Void> deleteAddress(@PathVariable Long id) {

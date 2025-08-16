@@ -16,4 +16,8 @@ public interface IAuthenticationService {
     AuthResponse refreshToken(RefreshTokenRequest input);
 
     void logout(LogoutRequest input);
+
+    boolean checkEmailExists(String email);
+
+    void resetPassword(String email, String newPassword);
 }

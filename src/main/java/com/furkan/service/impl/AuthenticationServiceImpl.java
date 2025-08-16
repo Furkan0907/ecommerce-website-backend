@@ -106,7 +106,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String accessToken = jwtService.generateToken(user);
         RefreshToken refreshToken = refreshTokenRepository.save(createRefreshToken(user));
 
-        return new AuthResponse(accessToken, refreshToken.getRefreshToken());
+        return new AuthResponse(accessToken, refreshToken.getRefreshToken(), user.getRole());
     }
 
     @Override
@@ -129,7 +129,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         RefreshToken newRefreshToken = refreshTokenRepository.save(createRefreshToken(user));
 
 
-        return new AuthResponse(newAccessToken, newRefreshToken.getRefreshToken());
+        return new AuthResponse(newAccessToken, newRefreshToken.getRefreshToken(), user.getRole());
     }
 
     @Override
@@ -140,5 +140,24 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 )));
 
         refreshTokenRepository.delete(refreshToken);
+    }
+
+    @Override
+    public boolean checkEmailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.USER_NOT_FOUND, null)));
+
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new BaseException(new ErrorMessage(MessageType.INVALID_PASSWORD, "Password must be at least 6 character"));
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(new Date());
+        userRepository.save(user);
     }
 }

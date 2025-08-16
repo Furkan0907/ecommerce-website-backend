@@ -3,7 +3,6 @@ package com.furkan.controller.impl;
 import com.furkan.controller.IRestOrderController;
 import com.furkan.controller.RestBaseController;
 import com.furkan.dto.request.DtoOrderIU;
-import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.DtoOrder;
 import com.furkan.enums.OrderStatus;
 import com.furkan.service.IOrderService;

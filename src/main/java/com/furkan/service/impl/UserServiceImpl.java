@@ -76,7 +76,9 @@ public class UserServiceImpl implements IUserService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.USER_NOT_FOUND, id.toString())));
         user.setUpdatedAt(new Date());
         user.setUsername(dtoUserIU.getUsername());
-        user.setPassword(passwordEncoder.encode(dtoUserIU.getPassword()));
+        if (dtoUserIU.getPassword() != null && !dtoUserIU.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(dtoUserIU.getPassword()));
+        }
         user.setRole(dtoUserIU.getRole());
         user.setEmail(dtoUserIU.getEmail());
         User savedUser = userRepository.save(user);

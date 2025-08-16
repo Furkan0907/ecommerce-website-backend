@@ -75,9 +75,9 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
             dtoOrder.setAddress(dtoAddress);
         }
 
-        if (input.getOrder().getPayment() != null) {
+        if (input.getOrder().getPayments() != null) {
             DtoPayment dtoPayment = new DtoPayment();
-            BeanUtils.copyProperties(input.getOrder().getPayment(), dtoPayment);
+            BeanUtils.copyProperties(input.getOrder().getPayments(), dtoPayment);
             dtoOrder.setPayment(dtoPayment);
         }
 

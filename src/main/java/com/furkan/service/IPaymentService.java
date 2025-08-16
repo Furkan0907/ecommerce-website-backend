@@ -3,6 +3,7 @@ package com.furkan.service;
 import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.DtoPayment;
 import com.furkan.enums.PaymentStatus;
+import com.stripe.exception.StripeException;
 
 import java.util.List;
 
@@ -18,5 +19,7 @@ public interface IPaymentService {
 
     DtoPayment updatePaymentStatus(Long orderId, PaymentStatus newStatus, String transactionId);
 
-    DtoPayment refundPayment(Long orderId);
+    DtoPayment refundPayment(Long orderId) throws StripeException;
+
+    void handleStripeWebhook(String payload, String sigHeader);
 }

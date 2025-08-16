@@ -5,6 +5,7 @@ import com.furkan.controller.RestBaseController;
 import com.furkan.dto.request.DtoCartIU;
 import com.furkan.dto.response.DtoCart;
 import com.furkan.dto.response.DtoCartItem;
+import com.furkan.dto.response.DtoOrder;
 import com.furkan.service.ICartService;
 import com.furkan.utils.RootEntity;
 import jakarta.validation.Valid;
@@ -49,7 +50,7 @@ public class RestCartControllerImpl extends RestBaseController implements IRestC
         return ok(cartService.updateCart(id, updatedCart));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(#id)")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Override
     public RootEntity<Void> deleteCart(@PathVariable(value = "id") Long id) {
@@ -99,10 +100,17 @@ public class RestCartControllerImpl extends RestBaseController implements IRestC
         return ok();
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(#cartId)")
-    @GetMapping("/{cartId}/items")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(@cartRepository.findByUserId(#userId).orElse(null)?.id)")
+    @GetMapping("/{userId}/items")
     @Override
-    public RootEntity<List<DtoCartItem>> getCartItems(@PathVariable(value = "cartId") Long cartId) {
-        return ok(cartService.getCartItems(cartId));
+    public RootEntity<List<DtoCartItem>> getCartItems(@PathVariable(value = "userId") Long userId) {
+        return ok(cartService.getCartItems(userId));
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessCart(@cartRepository.findByUserId(#userId).orElse(null)?.id)")
+    @PostMapping("/{userId}/confirm")
+    @Override
+    public RootEntity<DtoOrder> confirmCart(@PathVariable Long userId, @RequestBody Long addressId) {
+        return ok(cartService.confirmCart(userId, addressId));
     }
 }

@@ -20,4 +20,6 @@ public interface IRestPaymentController {
     RootEntity<DtoPayment> updatePaymentStatus(Long orderId, PaymentStatus newStatus, String transactionId);
 
     RootEntity<DtoPayment> refundPayment(Long orderId);
+
+    RootEntity<Void> handleStripeWebhook(String payload, String sigHeader);
 }

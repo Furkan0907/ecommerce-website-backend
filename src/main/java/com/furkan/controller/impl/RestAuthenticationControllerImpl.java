@@ -12,10 +12,7 @@ import com.furkan.service.IAuthenticationService;
 import com.furkan.utils.RootEntity;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -47,6 +44,19 @@ public class RestAuthenticationControllerImpl extends RestBaseController impleme
     @Override
     public RootEntity<Void> logout(@Valid @RequestBody LogoutRequest input) {
         authenticationService.logout(input);
+        return ok();
+    }
+
+    @GetMapping("/check-email")
+    @Override
+    public RootEntity<Boolean> checkEmailExists(@RequestParam String email) {
+        return ok(authenticationService.checkEmailExists(email));
+    }
+
+    @PutMapping("/reset-password")
+    @Override
+    public RootEntity<Void> resetPassword(@RequestParam String email, @RequestParam String newPassword) {
+        authenticationService.resetPassword(email, newPassword);
         return ok();
     }
 }

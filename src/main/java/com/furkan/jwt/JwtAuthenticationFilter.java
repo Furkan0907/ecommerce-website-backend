@@ -40,6 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String token = header.substring(7);
+
+        if (token.isBlank()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String username;
 
         try {
@@ -57,9 +62,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (ExpiredJwtException ex) {
-            throw new BaseException(new ErrorMessage(MessageType.REFRESH_TOKEN_IS_EXPIRED, ex.getMessage()));
+            //throw new BaseException(new ErrorMessage(MessageType.REFRESH_TOKEN_IS_EXPIRED, ex.getMessage()));
+            logger.warn("JWT expired: " + ex.getMessage());
         } catch (Exception e) {
-            throw new BaseException(new ErrorMessage(MessageType.GENERAL_EXCEPTION, e.getMessage()));
+            //throw new BaseException(new ErrorMessage(MessageType.GENERAL_EXCEPTION, e.getMessage()));
+            logger.warn("JWT processing error: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

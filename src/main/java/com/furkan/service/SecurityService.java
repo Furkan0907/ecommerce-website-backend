@@ -2,6 +2,7 @@ package com.furkan.service;
 
 import com.furkan.model.User;
 import com.furkan.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @Service("securityService")
 @EnableMethodSecurity
 public class SecurityService {

@@ -72,9 +72,9 @@ public class OrderServiceImpl implements IOrderService {
             dtoOrder.setOrderItems(dtoOrderItems);
         }
 
-        if (order.getPayment() != null) {
+        if (order.getPayments() != null) {
             DtoPayment payment = new DtoPayment();
-            BeanUtils.copyProperties(order.getPayment(), payment);
+            BeanUtils.copyProperties(order.getPayments(), payment);
             payment.setUpdatedAt(new Date());
             dtoOrder.setPayment(payment);
         }
@@ -239,6 +239,10 @@ public class OrderServiceImpl implements IOrderService {
 
         if (order.getStatus().equals(OrderStatus.CANCELLED)) {
             throw new BaseException(new ErrorMessage(MessageType.ORDER_ALREADY_CANCELLED, orderId.toString()));
+        }
+
+        if (!order.getStatus().equals(OrderStatus.CONFIRMED)) {
+            throw new BaseException(new ErrorMessage(MessageType.CAN_NOT_CANCEL_ORDER, orderId.toString()));
         }
 
         order.setStatus(OrderStatus.CANCELLED);

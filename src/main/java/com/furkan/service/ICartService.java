@@ -3,6 +3,7 @@ package com.furkan.service;
 import com.furkan.dto.request.DtoCartIU;
 import com.furkan.dto.response.DtoCart;
 import com.furkan.dto.response.DtoCartItem;
+import com.furkan.dto.response.DtoOrder;
 
 import java.util.List;
 
@@ -28,5 +29,7 @@ public interface ICartService {
 
     void clearCart(Long userId);
 
-    List<DtoCartItem> getCartItems(Long cartId);
+    List<DtoCartItem> getCartItems(Long userId);
+
+    DtoOrder confirmCart(Long userId, Long addressId);
 }
