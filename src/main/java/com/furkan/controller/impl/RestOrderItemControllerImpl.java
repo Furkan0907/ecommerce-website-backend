@@ -55,4 +55,25 @@ public class RestOrderItemControllerImpl extends RestBaseController implements I
         orderItemService.deleteOrderItem(id);
         return ok();
     }
+
+    @PutMapping("{id}/deliver")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public RootEntity<DtoOrderItem> deliverOrderItem(@PathVariable Long id) {
+        return ok(orderItemService.deliverOrderItem(id));
+    }
+
+    @PutMapping("/{id}/ship")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public RootEntity<DtoOrderItem> markOrderItemShipped(@PathVariable Long id) {
+        return ok(orderItemService.markOrderItemShipped(id));
+    }
+
+    @PutMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isOrderOwner(#id, authentication.name)")
+    @Override
+    public RootEntity<DtoOrderItem> cancelOrderItem(@PathVariable Long id) {
+        return ok(orderItemService.cancelOrderItem(id));
+    }
 }

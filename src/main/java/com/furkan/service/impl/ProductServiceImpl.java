@@ -2,11 +2,15 @@ package com.furkan.service.impl;
 
 import com.furkan.dto.request.DtoProductIU;
 import com.furkan.dto.response.DtoProduct;
+import com.furkan.dto.response.DtoUser;
+import com.furkan.enums.Role;
 import com.furkan.exception.BaseException;
 import com.furkan.exception.ErrorMessage;
 import com.furkan.exception.MessageType;
 import com.furkan.model.Product;
+import com.furkan.model.User;
 import com.furkan.repository.ProductRepository;
+import com.furkan.repository.UserRepository;
 import com.furkan.service.IProductService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
@@ -27,10 +31,27 @@ public class ProductServiceImpl implements IProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private Product createProduct(DtoProductIU input) {
         Product product = new Product();
-        BeanUtils.copyProperties(input, product);
         product.setCreatedAt(new Date());
+        product.setName(input.getName());
+        product.setBrand(input.getBrand());
+        product.setStockQuantity(input.getStockQuantity());
+        product.setDescription(input.getDescription());
+        product.setPrice(input.getPrice());
+        product.setCategory(input.getCategory());
+        product.setImageUrl(input.getImageUrl());
+
+        User seller = userRepository.findById(input.getSellerId())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.USER_NOT_FOUND, input.getSellerId().toString())));
+        if (seller.getRole() != Role.SELLER) {
+            throw new BaseException(new ErrorMessage(MessageType.USER_IS_NOT_SELLER, seller.getId().toString()));
+        }
+        product.setSeller(seller);
+
         product.setUpdatedAt(new Date());
         return product;
     }
@@ -38,6 +59,11 @@ public class ProductServiceImpl implements IProductService {
     private DtoProduct dtoTransformation(Product product) {
         DtoProduct dtoProduct = new DtoProduct();
         BeanUtils.copyProperties(product, dtoProduct);
+
+        DtoUser seller = new DtoUser();
+        BeanUtils.copyProperties(product.getSeller(), seller);
+        dtoProduct.setSeller(seller);
+
         return dtoProduct;
     }
 
@@ -158,5 +184,25 @@ public class ProductServiceImpl implements IProductService {
             throw new BaseException(new ErrorMessage(MessageType.PRODUCT_FILTER_NOT_FOUND, "Filters: " + brand + ", " + category));
         }
         return dtoListConverter(productList);
+    }
+
+
+    @Override
+    public List<DtoProduct> findProductsBySellerId(Long sellerId) {
+        List<Product> products = productRepository.findBySellerId(sellerId);
+        if (products.isEmpty()) {
+            throw new BaseException(new ErrorMessage(MessageType.SELLER_HAS_NOT_ANY_PRODUCT, sellerId.toString()));
+        }
+        return dtoListConverter(products);
+    }
+
+    @Override
+    public long countProductsBySellerId(Long sellerId) {
+        return productRepository.countBySellerId(sellerId);
+    }
+
+    @Override
+    public Page<Product> findPageableProductsBySellerId(Long sellerId, Pageable pageable) {
+        return productRepository.findBySellerId(sellerId, pageable);
     }
 }

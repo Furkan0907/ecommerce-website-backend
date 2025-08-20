@@ -1,7 +1,6 @@
 package com.furkan.service;
 
 import com.furkan.dto.request.DtoOrderIU;
-import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.DtoOrder;
 import com.furkan.enums.OrderStatus;
 
@@ -26,8 +25,4 @@ public interface IOrderService {
     DtoOrder cancelOrder(Long orderId);
 
     OrderStatus getOrderStatus(Long orderId);
-
-    DtoOrder markOrderShipped(Long orderId);
-
-    DtoOrder deliverOrder(Long orderId);
 }

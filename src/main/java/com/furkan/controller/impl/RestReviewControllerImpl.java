@@ -33,7 +33,7 @@ public class RestReviewControllerImpl extends RestBaseController implements IRes
         return ok(reviewService.save(input));
     }
 
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("@securityService.isReviewOwner(#id) or hasRole('ADMIN')")
     @GetMapping("/{id}")
     @Override
     public RootEntity<DtoReview> findById(@PathVariable Long id) {
@@ -65,7 +65,6 @@ public class RestReviewControllerImpl extends RestBaseController implements IRes
         return ok(pageableResponse);
     }
 
-    @PreAuthorize("permitAll()")
     @GetMapping("/product/{productId}/pageable")
     @Override
     public RootEntity<RestPageableEntity<DtoReview>> findByProductId(@PathVariable Long productId, @ModelAttribute RestPageableRequest pageableRequest) {
@@ -90,7 +89,6 @@ public class RestReviewControllerImpl extends RestBaseController implements IRes
         return ok(reviewService.existsByUserIdAndProductId(userId, productId));
     }
 
-    @PreAuthorize("permitAll()")
     @GetMapping("/product/{productId}/average-rating")
     @Override
     public RootEntity<Double> getAverageRatingForProduct(@PathVariable Long productId) {

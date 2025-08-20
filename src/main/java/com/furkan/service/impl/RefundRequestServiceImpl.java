@@ -2,18 +2,18 @@ package com.furkan.service.impl;
 
 import com.furkan.dto.request.DtoRefundRequestIU;
 import com.furkan.dto.response.*;
+import com.furkan.enums.OrderItemStatus;
 import com.furkan.enums.OrderStatus;
 import com.furkan.enums.RefundRequestStatus;
 import com.furkan.exception.BaseException;
 import com.furkan.exception.ErrorMessage;
 import com.furkan.exception.MessageType;
-import com.furkan.model.Order;
-import com.furkan.model.RefundRequest;
-import com.furkan.model.User;
-import com.furkan.repository.OrderRepository;
-import com.furkan.repository.RefundRequestRepository;
-import com.furkan.repository.UserRepository;
+import com.furkan.model.*;
+import com.furkan.repository.*;
+import com.furkan.service.IOrderItemService;
+import com.furkan.service.IPaymentService;
 import com.furkan.service.IRefundRequestService;
+import com.stripe.exception.StripeException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -32,78 +31,59 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
     private RefundRequestRepository refundRequestRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private ProductRepository productRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private IPaymentService paymentService;
+
+    @Autowired
+    private IOrderItemService orderItemService;
 
     private DtoRefundRequest dtoConverter(RefundRequest input) {
         DtoRefundRequest refundRequest = new DtoRefundRequest();
 
         BeanUtils.copyProperties(input, refundRequest);
 
-        DtoOrder dtoOrder = new DtoOrder();
-        BeanUtils.copyProperties(input.getOrder(), dtoOrder);
+        DtoOrderItem dtoOrderItem = new DtoOrderItem();
+        BeanUtils.copyProperties(input.getOrderItem(), dtoOrderItem);
 
-
-        if (input.getOrder().getUser() != null) {
-            DtoUser dtoUser = new DtoUser();
-            BeanUtils.copyProperties(input.getOrder().getUser(), dtoUser);
-            dtoOrder.setUser(dtoUser);
+        if (dtoOrderItem.getProduct() != null) {
+            DtoProduct dtoProduct = new DtoProduct();
+            BeanUtils.copyProperties(dtoOrderItem.getProduct(), dtoProduct);
+            dtoOrderItem.setProduct(dtoProduct);
         }
 
-        if (input.getOrder().getOrderItems() != null) {
-            List<DtoOrderItem> dtoOrderItems = input.getOrder().getOrderItems().stream()
-                    .map(item -> {
-                        DtoOrderItem dtoItem = new DtoOrderItem();
-                        BeanUtils.copyProperties(item, dtoItem);
-
-                        if (item.getProduct() != null) {
-                            DtoProduct dtoProduct = new DtoProduct();
-                            BeanUtils.copyProperties(item.getProduct(), dtoProduct);
-                            dtoItem.setProduct(dtoProduct);
-                        }
-                        return dtoItem;
-                    }).collect(Collectors.toList());
-
-            dtoOrder.setOrderItems(dtoOrderItems);
-        }
-
-        if (input.getOrder().getAddress() != null) {
-            DtoAddress dtoAddress = new DtoAddress();
-            BeanUtils.copyProperties(input.getOrder().getAddress(), dtoAddress);
-            dtoOrder.setAddress(dtoAddress);
-        }
-
-        if (input.getOrder().getPayments() != null) {
-            DtoPayment dtoPayment = new DtoPayment();
-            BeanUtils.copyProperties(input.getOrder().getPayments(), dtoPayment);
-            dtoOrder.setPayment(dtoPayment);
-        }
-
-        refundRequest.setOrder(dtoOrder);
+        refundRequest.setOrderItem(dtoOrderItem);
 
         return refundRequest;
     }
 
     @Override
     public DtoRefundRequest createRefundRequest(DtoRefundRequestIU input) {
+        OrderItem item = orderItemRepository.findById(input.getOrderItemId())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_ITEM_NOT_FOUND, input.getOrderItemId().toString())));
+
+        Order order = item.getOrder();
+        User user = order.getUser();
+
         RefundRequest refundRequest = new RefundRequest();
-
-        Order order = orderRepository.findById(input.getOrderId())
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, input.getOrderId().toString())));
-
-        User user = userRepository.findById(order.getUser().getId())
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.USER_NOT_FOUND, order.getUser().getId().toString())));
-
         refundRequest.setOrder(order);
+        refundRequest.setOrderItem(item);
         refundRequest.setUser(user);
         refundRequest.setReason(input.getReason());
         refundRequest.setStatus(RefundRequestStatus.PENDING);
         refundRequest.setCreatedAt(new Date());
         refundRequest.setUpdatedAt(new Date());
 
-        order.setStatus(OrderStatus.RETURN_REQUESTED);
+        item.setStatus(OrderItemStatus.RETURN_REQUESTED);
+
+        order.setStatus(OrderStatus.PARTIALLY_RETURN_REQUESTED);
         orderRepository.save(order);
 
         RefundRequest saved = refundRequestRepository.save(refundRequest);
@@ -160,9 +140,13 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         refundRequest.setUpdatedAt(new Date());
         RefundRequest saved = refundRequestRepository.save(refundRequest);
 
-        Order order = refundRequest.getOrder();
-        order.setStatus(OrderStatus.RETURNED);
-        orderRepository.save(order);
+       OrderItem item = refundRequest.getOrderItem();
+       try {
+           paymentService.refundPaymentItem(item.getId());
+       } catch (StripeException e) {
+           System.out.println(e.getMessage());
+       }
+
         return dtoConverter(saved);
     }
 
@@ -177,9 +161,11 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         refundRequest.setUpdatedAt(new Date());
         RefundRequest saved = refundRequestRepository.save(refundRequest);
 
-        Order order = refundRequest.getOrder();
-        order.setStatus(OrderStatus.DELIVERED);
-        orderRepository.save(order);
+        OrderItem item = refundRequest.getOrderItem();
+        item.setStatus(OrderItemStatus.REFUND_REJECTED);
+
+        orderItemService.updateOrderAggregateStatus(refundRequest.getOrder());
+
         return dtoConverter(saved);
     }
 
@@ -194,9 +180,11 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         refundRequest.setUpdatedAt(new Date());
         RefundRequest saved = refundRequestRepository.save(refundRequest);
 
-        Order order = refundRequest.getOrder();
-        order.setStatus(OrderStatus.DELIVERED);
-        orderRepository.save(order);
+        OrderItem item = refundRequest.getOrderItem();
+        item.setStatus(OrderItemStatus.REFUND_REJECTED);
+
+        orderItemService.updateOrderAggregateStatus(refundRequest.getOrder());
+
         return dtoConverter(saved);
     }
 }

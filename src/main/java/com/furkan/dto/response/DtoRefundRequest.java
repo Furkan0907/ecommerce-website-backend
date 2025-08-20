@@ -13,7 +13,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DtoRefundRequest extends DtoBase {
 
-    private DtoOrder order;
+    private Long orderId;
+
+    private DtoOrderItem orderItem;
+
+    private Long userId;
 
     private String reason;
 

@@ -33,4 +33,7 @@ public class DtoProductIU {
     private String brand;
 
     private String imageUrl;
+
+    @NotNull
+    private Long sellerId;
 }

@@ -10,7 +10,7 @@ import lombok.Setter;
 public class DtoRefundRequestIU {
 
     @NotNull
-    private Long orderId;
+    private Long orderItemId;
 
     @NotBlank
     private String reason;

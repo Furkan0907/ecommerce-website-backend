@@ -1,7 +1,6 @@
 package com.furkan.controller;
 
 import com.furkan.dto.request.DtoOrderIU;
-import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.DtoOrder;
 import com.furkan.enums.OrderStatus;
 import com.furkan.utils.RootEntity;
@@ -27,8 +26,4 @@ public interface IRestOrderController {
     RootEntity<DtoOrder> cancelOrder(Long orderId);
 
     RootEntity<OrderStatus> getOrderStatus(Long orderId);
-
-    RootEntity<DtoOrder> markOrderShipped(Long orderId);
-
-    RootEntity<DtoOrder> deliverOrder(Long orderId);
 }

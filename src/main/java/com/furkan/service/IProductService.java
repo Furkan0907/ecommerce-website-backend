@@ -38,4 +38,10 @@ public interface IProductService {
     Page<Product> findProductsPaged(Pageable pageable);
 
     List<DtoProduct> findByFilter(String brand, String category, BigDecimal minPrice, BigDecimal maxPrice);
+
+    List<DtoProduct> findProductsBySellerId(Long sellerId);
+
+    long countProductsBySellerId(Long sellerId);
+
+    Page<Product> findPageableProductsBySellerId(Long sellerId, Pageable pageable);
 }

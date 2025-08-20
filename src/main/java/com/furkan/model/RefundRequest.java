@@ -23,10 +23,14 @@ public class RefundRequest extends BaseEntity {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_item_id", nullable = false)
+    private OrderItem orderItem;
+
     @Column(nullable = false)
     private String reason;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RefundRequestStatus status = RefundRequestStatus.PENDING;
+    private RefundRequestStatus status;
 }

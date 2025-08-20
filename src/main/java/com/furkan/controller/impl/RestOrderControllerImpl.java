@@ -84,18 +84,4 @@ public class RestOrderControllerImpl extends RestBaseController implements IRest
     public RootEntity<OrderStatus> getOrderStatus(@PathVariable Long orderId) {
         return ok(orderService.getOrderStatus(orderId));
     }
-
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessOrder(#orderId)")
-    @PutMapping("/{orderId}/ship")
-    @Override
-    public RootEntity<DtoOrder> markOrderShipped(@PathVariable Long orderId) {
-        return ok(orderService.markOrderShipped(orderId));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("{orderId}/deliver")
-    @Override
-    public RootEntity<DtoOrder> deliverOrder(@PathVariable Long orderId) {
-        return ok(orderService.deliverOrder(orderId));
-    }
 }

@@ -36,4 +36,10 @@ public interface IRestProductController {
     RootEntity<RestPageableEntity<DtoProduct>> findProductsPaged(RestPageableRequest request);
 
     RootEntity<List<DtoProduct>> findByFilter(String brand, String category, BigDecimal minPrice, BigDecimal maxPrice);
+
+    RootEntity<List<DtoProduct>> findProductsBySellerId(Long sellerId);
+
+    RootEntity<Long> countProductsBySellerId(Long sellerId);
+
+    RootEntity<RestPageableEntity<DtoProduct>> findPageableProductsBySellerId(Long sellerId, RestPageableRequest pageableRequest);
 }

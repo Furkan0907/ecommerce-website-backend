@@ -2,6 +2,7 @@ package com.furkan.service.impl;
 
 import com.furkan.dto.request.DtoPaymentIU;
 import com.furkan.dto.response.DtoPayment;
+import com.furkan.enums.OrderItemStatus;
 import com.furkan.enums.OrderStatus;
 import com.furkan.enums.PaymentMethod;
 import com.furkan.enums.PaymentStatus;
@@ -9,9 +10,12 @@ import com.furkan.exception.BaseException;
 import com.furkan.exception.ErrorMessage;
 import com.furkan.exception.MessageType;
 import com.furkan.model.Order;
+import com.furkan.model.OrderItem;
 import com.furkan.model.Payment;
+import com.furkan.repository.OrderItemRepository;
 import com.furkan.repository.OrderRepository;
 import com.furkan.repository.PaymentRepository;
+import com.furkan.service.IOrderItemService;
 import com.furkan.service.IOrderService;
 import com.furkan.service.IPaymentService;
 import com.stripe.Stripe;
@@ -44,6 +48,12 @@ public class PaymentServiceImpl implements IPaymentService {
 
     @Autowired
     private IOrderService orderService;
+
+    @Autowired
+    private IOrderItemService orderItemService;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Value("${stripe.secret.key}")
     private String stripeSecretKey;
@@ -215,38 +225,47 @@ public class PaymentServiceImpl implements IPaymentService {
     }
 
     @Override
-    public DtoPayment refundPayment(Long orderId) throws StripeException {
-        List<Payment> payments = paymentRepository.findByOrderId(orderId);
-        if (payments.isEmpty()) {
-            throw new BaseException(new ErrorMessage(MessageType.NO_PAYMENT_FOUND_FOR_THIS_ORDER, orderId.toString()));
+    public DtoPayment refundPaymentItem(Long orderItemId) throws StripeException {
+        boolean isTestMode = true;
+
+        OrderItem item = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_ITEM_NOT_FOUND, orderItemId.toString())));
+
+        if (item.getStatus() != OrderItemStatus.RETURN_REQUESTED) {
+            throw new BaseException(new ErrorMessage(MessageType.CANNOT_REFUND_ITEM, orderItemId.toString()));
         }
 
-        Payment payment = payments.stream()
+        Order order = item.getOrder();
+        Order fetchOrder = orderRepository.findWithItems(order.getId())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, order.getId().toString())));
+
+        Payment payment = paymentRepository.findByOrderIdAndStatus(fetchOrder.getId(), PaymentStatus.COMPLETED)
+                .stream()
                 .max(Comparator.comparing(Payment::getCreatedAt))
-                .orElseThrow();
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_PENDING_PAYMENT_FOUND, fetchOrder.getId().toString())));
 
-        if (payment.getStatus() != PaymentStatus.COMPLETED) {
-            throw new BaseException(new ErrorMessage(MessageType.PAYMENT_NOT_COMPLETED, orderId.toString()));
+        if(!isTestMode) {
+            if (payment.getTransactionId() == null || payment.getTransactionId().isEmpty()) {
+                throw new BaseException(new ErrorMessage(MessageType.NO_TRANSACTION_ID, fetchOrder.getId().toString()));
+            }
+
+            Stripe.apiKey = stripeSecretKey;
+            RefundCreateParams params = RefundCreateParams.builder()
+                    .setPaymentIntent(payment.getTransactionId())
+                    .build();
+            Refund.create(params);
         }
 
-        Stripe.apiKey = stripeSecretKey;
+        orderItemService.refundOrderItem(item.getId());
 
-        RefundCreateParams params = RefundCreateParams.builder()
-                        .setPaymentIntent(payment.getTransactionId())
-                                .build();
+        boolean allReturned = fetchOrder.getOrderItems().stream()
+                .allMatch(i -> i.getStatus() == OrderItemStatus.RETURNED);
 
-        Refund refund = Refund.create(params);
-
-        payment.setStatus(PaymentStatus.REFUNDED);
+        payment.setStatus(allReturned ? PaymentStatus.REFUNDED : PaymentStatus.PARTIALLY_REFUNDED);
         payment.setUpdatedAt(new Date());
-        Payment refundedPayment = paymentRepository.save(payment);
+        paymentRepository.save(payment);
 
-        Order order = refundedPayment.getOrder();
-        order.setStatus(OrderStatus.REFUNDED);
-        order.setUpdatedAt(new Date());
-        orderRepository.save(order);
-
-        return dtoConverter(refundedPayment);
+        return dtoConverter(payment);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.furkan.model;
 
+import com.furkan.enums.OrderItemStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,4 +30,8 @@ public class OrderItem extends BaseEntity {
 
     @Column(nullable = false)
     private BigDecimal price;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OrderItemStatus status;
 }

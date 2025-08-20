@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -19,4 +20,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     WHERE o.user.id = :userId AND oi.product.id = :productId AND o.status = 'DELIVERED'
     """)
     boolean existsByUserIdAndProductIdConfirmedOrders(@Param("userId") Long userId, @Param("productId") Long productId);
+
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :id")
+    Optional<Order> findWithItems(@Param("id") Long id);
 }

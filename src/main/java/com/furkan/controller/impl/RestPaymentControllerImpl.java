@@ -62,13 +62,13 @@ public class RestPaymentControllerImpl extends RestBaseController implements IRe
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{orderId}/refund")
+    @PutMapping("/{orderItemId}/refund")
     @Override
-    public RootEntity<DtoPayment> refundPayment(@PathVariable Long orderId) {
+    public RootEntity<DtoPayment> refundPaymentItem(@PathVariable Long orderItemId) {
         try {
-            return ok(paymentService.refundPayment(orderId));
+            return ok(paymentService.refundPaymentItem(orderItemId));
         } catch (StripeException e) {
-            throw new BaseException(new ErrorMessage(MessageType.REFUND_FAILED, orderId.toString()));
+            throw new BaseException(new ErrorMessage(MessageType.REFUND_FAILED, orderItemId.toString()));
         }
     }
 

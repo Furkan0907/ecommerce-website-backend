@@ -1,6 +1,7 @@
 package com.furkan.repository;
 
 import com.furkan.model.Product;
+import com.furkan.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,4 +39,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "from Product")
     Page<Product> findAllPageable(Pageable pageable);
+
+    List<Product> findBySellerId(Long sellerId);
+
+    long countBySellerId(Long sellerId);
+
+    Page<Product> findBySellerId(Long sellerId, Pageable pageable);
 }

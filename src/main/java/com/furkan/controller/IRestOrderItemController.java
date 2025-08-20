@@ -17,4 +17,10 @@ public interface IRestOrderItemController {
     RootEntity<DtoOrderItem> updateOrderItem(Long id, DtoOrderItemIU input);
 
     RootEntity<Void> deleteOrderItem(Long id);
+
+    RootEntity<DtoOrderItem> cancelOrderItem(Long id);
+
+    RootEntity<DtoOrderItem> markOrderItemShipped(Long id);
+
+    RootEntity<DtoOrderItem> deliverOrderItem(Long id);
 }

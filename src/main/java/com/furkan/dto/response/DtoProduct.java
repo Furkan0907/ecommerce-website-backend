@@ -27,4 +27,6 @@ public class DtoProduct extends DtoBase {
     private String brand;
 
     private String imageUrl;
+
+    private DtoUser seller;
 }

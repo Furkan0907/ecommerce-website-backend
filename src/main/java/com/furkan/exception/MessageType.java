@@ -13,6 +13,7 @@ public enum MessageType {
     EMAIL_NOT_FOUND("1009", "kayıtlı email bulunamadı"),
     REFRESH_TOKEN_NOT_FOUND("1003", "refresh token bulunamadı"),
     INVALID_PASSWORD("1004", "şifre geçerli değil"),
+    USER_IS_NOT_SELLER("1005", "Satıcı dışında kişiler sisteme ürün ekleyemez"),
 
     NO_ADDRESS_FOUND_FOR_THIS_USER("1501", "bu kullanıcıya ait adres bulunamadı"),
     ADDRESS_NOT_FOUND("1502", "bu id ye sahip adres bulunamadı"),
@@ -25,6 +26,7 @@ public enum MessageType {
     PRODUCT_AVAILABILITY_NOT_FOUND("2006", "mevcut stokta ürün bulunamadı"),
     PRODUCT_FILTER_NOT_FOUND("2007", "verilen kriterde ürün bulunamadı"),
     OUT_OF_STOCK("2008", "ürünün talep edilen kadar stok durumu yoktur"),
+    SELLER_HAS_NOT_ANY_PRODUCT("2009", "satıcının satışta hiç ürünü yok"),
 
     CART_NOT_FOUND("3001", "verilen id'li sepet bulunamadı"),
     CART_LIST_IS_EMPTY("3002", "sistemde hiç kayıtlı sepet yok"),
@@ -42,6 +44,10 @@ public enum MessageType {
     CAN_NOT_CANCEL_ORDER("5008", "siparişi artık iptal edemez"),
 
     ORDER_ITEM_NOT_FOUND("6001", "sipariş içinde böyle bir ürün bulunamadı"),
+    CANNOT_CANCEL_ITEM("6002", "ürünü iptal edemezsiniz"),
+    CANNOT_REFUND_ITEM("6003", "ürünün iade talebini isteyemezsiniz"),
+    ORDER_ITEM_MUST_BE_CONFIRMED("6004", "ürün kargoya verilmeden ödemesi yapılması lazım"),
+    ORDER_ITEM_MUST_BE_SHIPPED("6005", "ürün teslim edilmeden önce kargoya verilmesi lazım"),
 
     NO_PAYMENT_FOUND_FOR_THIS_ORDER("7001", "sipariş için ödeme bilgisi bulunamadı"),
     PAYMENT_LIST_IS_EMPTY_FOR_THIS_USER("7002", "bu kullanıcının ödeme geçmişi bulunmamaktadır"),
@@ -49,7 +55,8 @@ public enum MessageType {
     PAYMENT_FAILED("7004", "ödeme işlemi başarılı olamadı"),
     PAYMENT_NOT_COMPLETED("7005", "ödeme henüz tamamlanmadı"),
     REFUND_FAILED("7006", "geri ödeme gerçekleştirilemedi"),
-    No_PENDING_PAYMENT_FOUND("7007", "işlenen ödeme bulunamadı"),
+    NO_PENDING_PAYMENT_FOUND("7007", "işlenen ödeme bulunamadı"),
+    NO_TRANSACTION_ID("7008", "transaction id bulunamadı"),
 
     REFUND_REQUEST_NOT_FOUND("8001", "iade talebi bulunamadı"),
     REFUND_REQUEST_LIST_IS_EMPTY("8002", "hiçbir iade talebi yok"),

@@ -6,12 +6,14 @@ import com.furkan.dto.request.DtoProductIU;
 import com.furkan.dto.response.DtoProduct;
 import com.furkan.model.Product;
 import com.furkan.service.IProductService;
+import com.furkan.utils.PagerUtil;
 import com.furkan.utils.RestPageableEntity;
 import com.furkan.utils.RestPageableRequest;
 import com.furkan.utils.RootEntity;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +27,7 @@ public class RestProductControllerImpl extends RestBaseController implements IRe
     @Autowired
     private IProductService productService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
+    @PreAuthorize("hasRole('SELLER')")
     @PostMapping()
     @Override
     public RootEntity<DtoProduct> saveProduct(@Valid @RequestBody DtoProductIU input) {
@@ -38,14 +40,12 @@ public class RestProductControllerImpl extends RestBaseController implements IRe
         return ok(productService.findProductById(id));
     }
 
-    @PreAuthorize("permitAll()")
     @GetMapping()
     @Override
     public RootEntity<List<DtoProduct>> findAllProducts() {
         return ok(productService.findAllProducts());
     }
 
-    @PreAuthorize("permitAll()")
     @GetMapping("/search/by-name")
     @Override
     public RootEntity<DtoProduct> findProductByName(@RequestParam String name) {
@@ -76,14 +76,14 @@ public class RestProductControllerImpl extends RestBaseController implements IRe
         return ok(productService.findProductsByAvailability(available));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
+    @PreAuthorize("hasRole('SELLER')")
     @PutMapping("/{id}")
     @Override
     public RootEntity<DtoProduct> updateProductById(@PathVariable(value = "id") Long id, @Valid @RequestBody DtoProductIU input) {
         return ok(productService.updateProductById(id, input));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SELLER')")
     @DeleteMapping("/{id}")
     @Override
     public RootEntity<Void> deleteProductById(@PathVariable(value = "id") Long id) {
@@ -91,6 +91,7 @@ public class RestProductControllerImpl extends RestBaseController implements IRe
         return ok();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/count")
     @Override
     public RootEntity<Long> countProducts() {
@@ -106,7 +107,6 @@ public class RestProductControllerImpl extends RestBaseController implements IRe
         return ok(pageableResponse);
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/filter")
     @Override
     public RootEntity<List<DtoProduct>> findByFilter(@RequestParam(required = false) String brand,
@@ -114,5 +114,28 @@ public class RestProductControllerImpl extends RestBaseController implements IRe
                                                      @RequestParam(required = false) BigDecimal minPrice,
                                                      @RequestParam(required = false) BigDecimal maxPrice) {
         return ok(productService.findByFilter(brand, category, minPrice, maxPrice));
+    }
+
+    @GetMapping("/{sellerId}/products")
+    @Override
+    public RootEntity<List<DtoProduct>> findProductsBySellerId(@PathVariable Long sellerId) {
+        return ok(productService.findProductsBySellerId(sellerId));
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/{sellerId}/products/count")
+    @Override
+    public RootEntity<Long> countProductsBySellerId(@PathVariable Long sellerId) {
+        return ok(productService.countProductsBySellerId(sellerId));
+    }
+
+    @GetMapping("/{sellerId}/products/pageable")
+    @Override
+    public RootEntity<RestPageableEntity<DtoProduct>> findPageableProductsBySellerId(@PathVariable Long sellerId, @ModelAttribute RestPageableRequest pageableRequest) {
+        Pageable pageable = PagerUtil.toPageable(pageableRequest);
+        Page<Product> page = productService.findPageableProductsBySellerId(sellerId, pageable);
+        List<DtoProduct> content = productService.dtoListConverter(page.getContent());
+        RestPageableEntity<DtoProduct> pageableResponse = PagerUtil.toPageableResponse(page, content);
+        return ok(pageableResponse);
     }
 }

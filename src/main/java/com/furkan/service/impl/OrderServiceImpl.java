@@ -2,6 +2,7 @@ package com.furkan.service.impl;
 
 import com.furkan.dto.request.DtoOrderIU;
 import com.furkan.dto.response.*;
+import com.furkan.enums.OrderItemStatus;
 import com.furkan.enums.OrderStatus;
 import com.furkan.exception.BaseException;
 import com.furkan.exception.ErrorMessage;
@@ -116,6 +117,7 @@ public class OrderServiceImpl implements IOrderService {
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setPrice(product.getPrice());
+            orderItem.setStatus(OrderItemStatus.PENDING);
             orderItem.setCreatedAt(new Date());
             orderItem.setUpdatedAt(new Date());
 
@@ -209,16 +211,17 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         for (OrderItem item : order.getOrderItems()) {
+            if (item.getStatus() != OrderItemStatus.PENDING) continue;
+
             Product product = item.getProduct();
             if (product.getStockQuantity() < item.getQuantity()) {
                 throw new BaseException(new ErrorMessage(MessageType.OUT_OF_STOCK, product.getId().toString()));
             }
-        }
 
-        for (OrderItem item : order.getOrderItems()) {
-            Product product = item.getProduct();
             product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
             productRepository.save(product);
+
+            item.setStatus(OrderItemStatus.CONFIRMED);
         }
 
         order.setStatus(OrderStatus.CONFIRMED);
@@ -245,6 +248,15 @@ public class OrderServiceImpl implements IOrderService {
             throw new BaseException(new ErrorMessage(MessageType.CAN_NOT_CANCEL_ORDER, orderId.toString()));
         }
 
+        for (OrderItem item: order.getOrderItems()) {
+            if (item.getStatus() == OrderItemStatus.CONFIRMED) {
+                item.setStatus(OrderItemStatus.CANCELLED);
+                Product product = item.getProduct();
+                product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+                productRepository.save(product);
+            }
+        }
+
         order.setStatus(OrderStatus.CANCELLED);
 
         order.setUpdatedAt(new Date());
@@ -259,33 +271,5 @@ public class OrderServiceImpl implements IOrderService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
 
         return order.getStatus();
-    }
-
-    @Override
-    public DtoOrder markOrderShipped(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
-
-        if (!order.getStatus().equals(OrderStatus.CONFIRMED)) {
-            throw new BaseException(new ErrorMessage(MessageType.ORDER_MUST_BE_CONFIRMED, orderId.toString()));
-        }
-
-        order.setStatus(OrderStatus.SHIPPED);
-        order.setUpdatedAt(new Date());
-        return dtoConverter(orderRepository.save(order));
-    }
-
-    @Override
-    public DtoOrder deliverOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
-
-        if (!order.getStatus().equals(OrderStatus.SHIPPED)) {
-            throw new BaseException(new ErrorMessage(MessageType.ORDER_MUST_BE_SHIPPED, orderId.toString()));
-        }
-
-        order.setStatus(OrderStatus.DELIVERED);
-        order.setUpdatedAt(new Date());
-        return dtoConverter(orderRepository.save(order));
     }
 }

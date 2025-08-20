@@ -1,6 +1,7 @@
 package com.furkan.dto.response;
 
 import com.furkan.dto.DtoBase;
+import com.furkan.enums.OrderItemStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,4 +20,6 @@ public class DtoOrderItem extends DtoBase {
     private Integer quantity;
 
     private BigDecimal price;
+
+    private OrderItemStatus status;
 }

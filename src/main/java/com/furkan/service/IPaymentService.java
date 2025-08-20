@@ -19,7 +19,7 @@ public interface IPaymentService {
 
     DtoPayment updatePaymentStatus(Long orderId, PaymentStatus newStatus, String transactionId);
 
-    DtoPayment refundPayment(Long orderId) throws StripeException;
+    DtoPayment refundPaymentItem(Long orderItemId) throws StripeException;
 
     void handleStripeWebhook(String payload, String sigHeader);
 }

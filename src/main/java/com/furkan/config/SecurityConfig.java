@@ -42,6 +42,9 @@ public class SecurityConfig {
             "/swagger-ui.html"
     };
 
+    public static final String REVIEWS = "api/reviews/product/**";
+
+
     @Autowired
     private AuthenticationProvider authenticationProvider;
 
@@ -67,7 +70,9 @@ public class SecurityConfig {
 
                         .requestMatchers(STRIPE_WEBHOOK).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/search/by-name").permitAll()
+                        .requestMatchers(REVIEWS).permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/products/", "api/products/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
 
