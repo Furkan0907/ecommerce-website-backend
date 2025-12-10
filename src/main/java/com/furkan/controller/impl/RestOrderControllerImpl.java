@@ -5,14 +5,21 @@ import com.furkan.controller.RestBaseController;
 import com.furkan.dto.request.DtoOrderIU;
 import com.furkan.dto.response.DtoOrder;
 import com.furkan.enums.OrderStatus;
+import com.furkan.model.Order;
 import com.furkan.service.IOrderService;
+import com.furkan.utils.PagerUtil;
+import com.furkan.utils.RestPageableEntity;
+import com.furkan.utils.RestPageableRequest;
 import com.furkan.utils.RootEntity;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -38,8 +45,11 @@ public class RestOrderControllerImpl extends RestBaseController implements IRest
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
     @Override
-    public RootEntity<List<DtoOrder>> findAllOrders() {
-        return ok(orderService.findAllOrders());
+    public RootEntity<RestPageableEntity<DtoOrder>> findAllOrders(@ModelAttribute RestPageableRequest pageableRequest) {
+        Page<Order> page = orderService.findAllOrders(toPageable(pageableRequest));
+        List<DtoOrder> content = orderService.dtoListConverter(page.getContent());
+        RestPageableEntity<DtoOrder> pageableResponse = toPageableResponse(page, content);
+        return ok(pageableResponse);
     }
 
     @PreAuthorize("@securityService.canAccessOrdersOfUser(#userId)")
@@ -83,5 +93,23 @@ public class RestOrderControllerImpl extends RestBaseController implements IRest
     @Override
     public RootEntity<OrderStatus> getOrderStatus(@PathVariable Long orderId) {
         return ok(orderService.getOrderStatus(orderId));
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/seller/{sellerId}/pageable")
+    @Override
+    public RootEntity<RestPageableEntity<DtoOrder>> findPageableOrdersBySeller(
+           @PathVariable Long sellerId, @ModelAttribute RestPageableRequest pageableRequest, @RequestParam(required = false) String status) {
+        Pageable pageable = PagerUtil.toPageable(pageableRequest);
+
+        Page<Order> page = orderService.findOrdersBySeller(sellerId, pageable, status);
+
+        List<DtoOrder> content = page.getContent().stream()
+                .map(order -> orderService.dtoConverterForSeller(order, sellerId))
+                .collect(Collectors.toList());
+
+        RestPageableEntity<DtoOrder> pageableResponse = PagerUtil.toPageableResponse(page, content);
+
+        return ok(pageableResponse);
     }
 }

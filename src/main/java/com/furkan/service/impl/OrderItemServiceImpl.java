@@ -118,9 +118,9 @@ public class OrderItemServiceImpl implements IOrderItemService {
         if (orderItem.getProduct() != null) {
             DtoProduct dtoProduct = new DtoProduct();
             BeanUtils.copyProperties(orderItem.getProduct(), dtoProduct);
-            if (dtoProduct.getSeller() != null) {
+            if (orderItem.getProduct().getSeller() != null) {
                 DtoUser dtoSeller = new DtoUser();
-                BeanUtils.copyProperties(dtoProduct.getSeller(), dtoSeller);
+                BeanUtils.copyProperties(orderItem.getProduct().getSeller(), dtoSeller);
                 dtoProduct.setSeller(dtoSeller);
             }
             dtoOrderItem.setProduct(dtoProduct);

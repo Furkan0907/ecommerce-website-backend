@@ -13,6 +13,8 @@ import com.furkan.service.IOrderService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -84,6 +86,59 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    public DtoOrder dtoConverterForSeller(Order order, Long sellerId) {
+        DtoOrder dtoOrder = new DtoOrder();
+        BeanUtils.copyProperties(order, dtoOrder);
+
+        if (order.getUser() != null) {
+            DtoUser dtoUser = new DtoUser();
+            BeanUtils.copyProperties(order.getUser(), dtoUser);
+            dtoOrder.setUser(dtoUser);
+        }
+
+        if (order.getAddress() != null) {
+            DtoAddress dtoAddress = new DtoAddress();
+            BeanUtils.copyProperties(order.getAddress(), dtoAddress);
+            dtoOrder.setAddress(dtoAddress);
+        }
+
+        if (order.getOrderItems() != null) {
+            List<DtoOrderItem> dtoOrderItems = order.getOrderItems().stream()
+                    .filter(item -> item.getProduct() != null && item.getProduct().getSeller().getId().equals(sellerId))
+                    .map(item -> {
+                        DtoOrderItem dtoItem = new DtoOrderItem();
+                        BeanUtils.copyProperties(item, dtoItem);
+
+                        if (item.getProduct() != null) {
+                            DtoProduct dtoProduct = new DtoProduct();
+                            BeanUtils.copyProperties(item.getProduct(), dtoProduct);
+                            dtoItem.setProduct(dtoProduct);
+                        }
+                        return dtoItem;
+                    }).collect(Collectors.toList());
+
+            dtoOrder.setOrderItems(dtoOrderItems);
+        }
+
+        if (order.getPayments() != null) {
+            DtoPayment payment = new DtoPayment();
+            BeanUtils.copyProperties(order.getPayments(), payment);
+            dtoOrder.setPayment(payment);
+        }
+
+        return dtoOrder;
+    }
+
+    @Override
+    public List<DtoOrder> dtoListConverter(List<Order> orderList) {
+        List<DtoOrder> dtoOrderList = new ArrayList<>();
+        for (Order dbOrder : orderList) {
+            dtoOrderList.add(dtoConverter(dbOrder));
+        }
+        return dtoOrderList;
+    }
+
+    @Override
     public DtoOrder createOrder(DtoOrderIU input) {
         User user = userRepository.findById(input.getUserId())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.USER_NOT_FOUND, input.getUserId().toString())));
@@ -144,13 +199,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public List<DtoOrder> findAllOrders() {
-        List<DtoOrder> dtoList = new ArrayList<>();
-        List<Order> orderList = orderRepository.findAll();
-        for (Order order : orderList) {
-            dtoList.add(dtoConverter(order));
-        }
-        return dtoList;
+    public Page<Order> findAllOrders(Pageable pageable) {
+        return orderRepository.findAllPageable(pageable);
     }
 
     @Override
@@ -271,5 +321,17 @@ public class OrderServiceImpl implements IOrderService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.ORDER_NOT_FOUND, orderId.toString())));
 
         return order.getStatus();
+    }
+
+    @Override
+    public Page<Order> findOrdersBySeller(Long sellerId, Pageable pageable, String status) {
+        Page<Order> orders;
+
+        if (status != null && !status.isEmpty()) {
+            orders = orderRepository.findDistinctByOrderItems_Product_Seller_IdAndStatus(sellerId, OrderStatus.valueOf(status), pageable);
+        } else {
+            orders = orderRepository.findDistinctByOrderItems_Product_Seller_Id(sellerId, pageable);
+        }
+        return orders;
     }
 }

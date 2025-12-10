@@ -35,7 +35,7 @@ public class RestOrderItemControllerImpl extends RestBaseController implements I
     }
 
     @GetMapping("/by-order-id/{orderId}")
-    @PreAuthorize("hasRole('ADMIN') or @securityService.canAccessOrder(#orderId)")
+    @PreAuthorize("hasRole('SELLER') or @securityService.canAccessOrder(#orderId)")
     @Override
     public RootEntity<List<DtoOrderItem>> findAllByOrderId(@PathVariable Long orderId) {
         return ok(orderItemService.findAllByOrderId(orderId));

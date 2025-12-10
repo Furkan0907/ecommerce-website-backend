@@ -5,6 +5,7 @@ import com.furkan.controller.RestBaseController;
 import com.furkan.dto.request.DtoRefundRequestIU;
 import com.furkan.dto.response.DtoRefundRequest;
 import com.furkan.service.IRefundRequestService;
+import com.furkan.service.SecurityService;
 import com.furkan.utils.RootEntity;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class RestRefundRequestControllerImpl extends RestBaseController implemen
 
     @Autowired
     private IRefundRequestService refundRequestService;
+
+    @Autowired
+    private SecurityService securityService;
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping()
@@ -67,5 +71,23 @@ public class RestRefundRequestControllerImpl extends RestBaseController implemen
     @Override
     public RootEntity<DtoRefundRequest> cancelRefundRequest(@PathVariable Long refundRequestId) {
         return ok(refundRequestService.cancelRefundRequest(refundRequestId));
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/seller/{refundRequestId}")
+    @Override
+    public RootEntity<DtoRefundRequest> findRefundRequestForSeller(@PathVariable Long refundRequestId) {
+        Long sellerId = securityService.getCurrentUserId();
+        DtoRefundRequest refundRequest = refundRequestService.findRefundRequestForSeller(refundRequestId, sellerId);
+        return ok(refundRequest);
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/seller")
+    @Override
+    public RootEntity<List<DtoRefundRequest>> findAllRefundRequestsBySellerId() {
+        Long sellerId = securityService.getCurrentUserId();
+        List<DtoRefundRequest> list = refundRequestService.findAllRefundRequestsBySellerId(sellerId);
+        return ok(list);
     }
 }

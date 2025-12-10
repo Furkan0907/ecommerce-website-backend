@@ -2,6 +2,7 @@ package com.furkan.service;
 
 import com.furkan.dto.request.DtoProductIU;
 import com.furkan.dto.response.DtoProduct;
+import com.furkan.dto.response.DtoUser;
 import com.furkan.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,4 +45,6 @@ public interface IProductService {
     long countProductsBySellerId(Long sellerId);
 
     Page<Product> findPageableProductsBySellerId(Long sellerId, Pageable pageable);
+
+    DtoUser findSellerByProductId(Long productId);
 }

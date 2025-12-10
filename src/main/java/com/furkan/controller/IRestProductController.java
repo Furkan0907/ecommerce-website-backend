@@ -2,6 +2,7 @@ package com.furkan.controller;
 
 import com.furkan.dto.request.DtoProductIU;
 import com.furkan.dto.response.DtoProduct;
+import com.furkan.dto.response.DtoUser;
 import com.furkan.utils.RestPageableEntity;
 import com.furkan.utils.RestPageableRequest;
 import com.furkan.utils.RootEntity;
@@ -42,4 +43,6 @@ public interface IRestProductController {
     RootEntity<Long> countProductsBySellerId(Long sellerId);
 
     RootEntity<RestPageableEntity<DtoProduct>> findPageableProductsBySellerId(Long sellerId, RestPageableRequest pageableRequest);
+
+    RootEntity<DtoUser> findSellerByProductId(Long productId);
 }

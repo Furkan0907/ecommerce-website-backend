@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -50,16 +51,26 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
 
         BeanUtils.copyProperties(input, refundRequest);
 
-        DtoOrderItem dtoOrderItem = new DtoOrderItem();
-        BeanUtils.copyProperties(input.getOrderItem(), dtoOrderItem);
+        refundRequest.setOrderId(input.getOrder().getId());
 
-        if (dtoOrderItem.getProduct() != null) {
-            DtoProduct dtoProduct = new DtoProduct();
-            BeanUtils.copyProperties(dtoOrderItem.getProduct(), dtoProduct);
-            dtoOrderItem.setProduct(dtoProduct);
+        refundRequest.setUserId(input.getUser().getId());
+
+        if (input.getOrderItem() != null) {
+            DtoOrderItem dtoOrderItem = new DtoOrderItem();
+            BeanUtils.copyProperties(input.getOrderItem(), dtoOrderItem);
+
+            if (input.getOrderItem().getProduct() != null) {
+                DtoProduct dtoProduct = new DtoProduct();
+                BeanUtils.copyProperties(input.getOrderItem().getProduct(), dtoProduct);
+                if (input.getOrderItem().getProduct().getSeller() != null) {
+                    DtoUser dtoSeller = new DtoUser();
+                    BeanUtils.copyProperties(input.getOrderItem().getProduct().getSeller(), dtoSeller);
+                    dtoProduct.setSeller(dtoSeller);
+                }
+                dtoOrderItem.setProduct(dtoProduct);
+            }
+            refundRequest.setOrderItem(dtoOrderItem);
         }
-
-        refundRequest.setOrderItem(dtoOrderItem);
 
         return refundRequest;
     }
@@ -186,5 +197,24 @@ public class RefundRequestServiceImpl implements IRefundRequestService {
         orderItemService.updateOrderAggregateStatus(refundRequest.getOrder());
 
         return dtoConverter(saved);
+    }
+
+    @Override
+    public List<DtoRefundRequest> findAllRefundRequestsBySellerId(Long sellerId) {
+        List<RefundRequest> refundRequests = refundRequestRepository.findAllByOrderItem_Product_SellerId(sellerId);
+        if (refundRequests.isEmpty()) {
+            throw new BaseException(new ErrorMessage(MessageType.REFUND_REQUEST_LIST_IS_EMPTY, null));
+        }
+
+        return refundRequests.stream()
+                .map(this::dtoConverter)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public DtoRefundRequest findRefundRequestForSeller(Long refundRequestId, Long sellerId) {
+        RefundRequest refundRequest = refundRequestRepository.findByIdAndOrderItem_Product_Seller_Id(refundRequestId, sellerId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.REFUND_REQUEST_NOT_FOUND, refundRequestId.toString())));
+        return dtoConverter(refundRequest);
     }
 }

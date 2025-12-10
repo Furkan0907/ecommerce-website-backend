@@ -21,4 +21,8 @@ public interface IRestRefundRequestController {
     RootEntity<DtoRefundRequest> rejectRefundRequest(Long refundRequestId);
 
     RootEntity<DtoRefundRequest> cancelRefundRequest(Long refundRequestId);
+
+    RootEntity<List<DtoRefundRequest>> findAllRefundRequestsBySellerId();
+
+    RootEntity<DtoRefundRequest> findRefundRequestForSeller(Long refundRequestId);
 }

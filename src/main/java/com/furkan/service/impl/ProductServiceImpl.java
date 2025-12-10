@@ -205,4 +205,15 @@ public class ProductServiceImpl implements IProductService {
     public Page<Product> findPageableProductsBySellerId(Long sellerId, Pageable pageable) {
         return productRepository.findBySellerId(sellerId, pageable);
     }
+
+    @Override
+    public DtoUser findSellerByProductId(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.PRODUCT_NOT_FOUND, productId.toString())));
+
+        User seller = product.getSeller();
+        DtoUser dtoUser = new DtoUser();
+        BeanUtils.copyProperties(seller, dtoUser);
+        return dtoUser;
+    }
 }

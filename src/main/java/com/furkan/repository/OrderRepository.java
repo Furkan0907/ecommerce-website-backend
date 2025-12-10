@@ -1,6 +1,9 @@
 package com.furkan.repository;
 
+import com.furkan.enums.OrderStatus;
 import com.furkan.model.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,4 +26,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :id")
     Optional<Order> findWithItems(@Param("id") Long id);
+
+    Page<Order> findDistinctByOrderItems_Product_Seller_Id(Long sellerId, Pageable pageable);
+
+    Page<Order> findDistinctByOrderItems_Product_Seller_IdAndStatus(Long sellerId, OrderStatus status, Pageable pageable);
+
+    @Query(value = "from Order")
+    Page<Order> findAllPageable(Pageable pageable);
 }

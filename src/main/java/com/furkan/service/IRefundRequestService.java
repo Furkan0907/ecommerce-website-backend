@@ -21,5 +21,7 @@ public interface IRefundRequestService {
 
     DtoRefundRequest cancelRefundRequest(Long refundRequestId);
 
+    List<DtoRefundRequest> findAllRefundRequestsBySellerId(Long sellerId);
 
+    DtoRefundRequest findRefundRequestForSeller(Long refundRequestId, Long sellerId);
 }

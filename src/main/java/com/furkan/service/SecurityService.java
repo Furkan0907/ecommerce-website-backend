@@ -1,5 +1,8 @@
 package com.furkan.service;
 
+import com.furkan.exception.BaseException;
+import com.furkan.exception.ErrorMessage;
+import com.furkan.exception.MessageType;
 import com.furkan.model.User;
 import com.furkan.repository.*;
 import lombok.extern.slf4j.Slf4j;
@@ -209,5 +212,17 @@ public class SecurityService {
         return addressRepository.findById(addressId)
                 .map(address -> address.getUser().getUsername().equals(currentUsername))
                 .orElse(false);
+    }
+
+    public Long getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("No authentication user found");
+        }
+
+        String username = auth.getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.USER_NOT_FOUND, username)))
+                .getId();
     }
 }

@@ -4,6 +4,7 @@ import com.furkan.controller.IRestProductController;
 import com.furkan.controller.RestBaseController;
 import com.furkan.dto.request.DtoProductIU;
 import com.furkan.dto.response.DtoProduct;
+import com.furkan.dto.response.DtoUser;
 import com.furkan.model.Product;
 import com.furkan.service.IProductService;
 import com.furkan.utils.PagerUtil;
@@ -137,5 +138,11 @@ public class RestProductControllerImpl extends RestBaseController implements IRe
         List<DtoProduct> content = productService.dtoListConverter(page.getContent());
         RestPageableEntity<DtoProduct> pageableResponse = PagerUtil.toPageableResponse(page, content);
         return ok(pageableResponse);
+    }
+
+    @GetMapping("/{productId}/seller")
+    @Override
+    public RootEntity<DtoUser> findSellerByProductId(@PathVariable Long productId) {
+        return ok(productService.findSellerByProductId(productId));
     }
 }
