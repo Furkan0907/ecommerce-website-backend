@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -111,5 +112,12 @@ public class RestOrderControllerImpl extends RestBaseController implements IRest
         RestPageableEntity<DtoOrder> pageableResponse = PagerUtil.toPageableResponse(page, content);
 
         return ok(pageableResponse);
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/monthly-sales")
+    @Override
+    public RootEntity<Map<String, Double>> getMonthlySalesStatistics() {
+        return ok(orderService.getMonthlySalesStatistics());
     }
 }

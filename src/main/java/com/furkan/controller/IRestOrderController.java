@@ -8,6 +8,7 @@ import com.furkan.utils.RestPageableRequest;
 import com.furkan.utils.RootEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IRestOrderController {
 
@@ -30,4 +31,6 @@ public interface IRestOrderController {
     RootEntity<OrderStatus> getOrderStatus(Long orderId);
 
     RootEntity<RestPageableEntity<DtoOrder>> findPageableOrdersBySeller(Long sellerId, RestPageableRequest pageableRequest, String status);
+
+    RootEntity<Map<String, Double>> getMonthlySalesStatistics();
 }

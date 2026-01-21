@@ -33,4 +33,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = "from Order")
     Page<Order> findAllPageable(Pageable pageable);
+
+    @Query(value = "SELECT MONTHNAME(created_at) as month, SUM(total_amount) as total " +
+                    "FROM `orders` " +
+                    "WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) " +
+                    "GROUP BY MONTH(created_at), MONTHNAME(created_at) " +
+                    "ORDER BY MIN(created_at) ASC", nativeQuery = true)
+    List<Object[]> getMonthlySales();
 }

@@ -18,9 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -333,5 +331,25 @@ public class OrderServiceImpl implements IOrderService {
             orders = orderRepository.findDistinctByOrderItems_Product_Seller_Id(sellerId, pageable);
         }
         return orders;
+    }
+
+    @Override
+    public Map<String, Double> getMonthlySalesStatistics() {
+        List<Object[]> result = orderRepository.getMonthlySales();
+        Map<String, Double> statistics = new LinkedHashMap<>();
+
+        for (Object[] row : result) {
+            String month = (String) row[0];
+
+            Double total = 0.0;
+            if (row[1] instanceof java.math.BigDecimal) {
+                total = ((java.math.BigDecimal) row[1]).doubleValue();
+            } else if (row[1] instanceof Double) {
+                total = (Double) row[1];
+            }
+
+            statistics.put(month, total);
+        }
+        return statistics;
     }
 }
